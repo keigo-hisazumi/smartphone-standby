@@ -106,6 +106,7 @@ export function createWidgetsView(ctx: WidgetContext, store: SettingsStore, acti
     onLongPress() {
       const sheet = openSheet('ウィジェットを編集');
       sheet.body.append(
+        section('', [h('div', { class: 'row-note', text: '同じウィジェットを左右どちらのスタックにも表示できます。' })]),
         stackEditor('左のスタック', 'leftStack'),
         stackEditor('右のスタック', 'rightStack'),
         section('スマートスタック', [

@@ -15,27 +15,22 @@ describe('mergeSettings', () => {
     expect('unknown' in s).toBe(false);
   });
 
-  it('既定では左のスタックにカレンダーを表示する', () => {
+  it('既定では左右どちらのスタックにも全ウィジェットを表示し、左の先頭はカレンダー', () => {
     expect(DEFAULT_SETTINGS.leftStack[0]).toBe('calendar');
-    expect(DEFAULT_SETTINGS.rightStack).not.toContain('calendar');
+    expect(DEFAULT_SETTINGS.rightStack[0]).toBe('analog-clock');
+    expect([...DEFAULT_SETTINGS.leftStack].sort()).toEqual([...DEFAULT_SETTINGS.rightStack].sort());
   });
 
-  it('旧バージョンの保存データは左のスタックの先頭にカレンダーを移す', () => {
+  it('旧バージョンの保存データは左のスタックの先頭にカレンダーを追加し、右はそのまま', () => {
     const s = mergeSettings({
       view: 'photos',
       leftStack: ['analog-clock', 'battery'],
       rightStack: ['calendar', 'date'],
     });
     expect(s.leftStack).toEqual(['calendar', 'analog-clock', 'battery']);
-    expect(s.rightStack).toEqual(['date']);
+    expect(s.rightStack).toEqual(['calendar', 'date']);
     expect(s.layoutVersion).toBe(DEFAULT_SETTINGS.layoutVersion);
     expect('view' in s).toBe(false);
-  });
-
-  it('移行で右のスタックが空になる場合は既定値に戻す', () => {
-    const s = mergeSettings({ leftStack: ['date'], rightStack: ['calendar'] });
-    expect(s.leftStack).toEqual(['calendar', 'date']);
-    expect(s.rightStack).toEqual(DEFAULT_SETTINGS.rightStack);
   });
 
   it('移行済みの保存データは並びを変えない', () => {
@@ -45,9 +40,10 @@ describe('mergeSettings', () => {
   });
 
   it('既定値オブジェクトを書き換えない', () => {
+    const before = [...DEFAULT_SETTINGS.leftStack];
     const s = mergeSettings({});
     s.leftStack.push('date');
-    expect(DEFAULT_SETTINGS.leftStack).toEqual(['calendar', 'date', 'weather']);
+    expect(DEFAULT_SETTINGS.leftStack).toEqual(before);
     expect(s.leftStack).not.toBe(DEFAULT_SETTINGS.leftStack);
   });
 });

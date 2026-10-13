@@ -49,8 +49,9 @@ export const DEFAULT_SETTINGS: Settings = {
   smartRotate: true,
   weatherEnabled: false,
   layoutVersion: 2,
-  leftStack: ['calendar', 'date', 'weather'],
-  rightStack: ['analog-clock', 'world-clock', 'digital-clock', 'battery'],
+  // 左右のスタックにはすべてのウィジェットを表示できる。既定では両方に全ウィジェットを入れ、先頭だけ変える
+  leftStack: ['calendar', 'date', 'weather', 'analog-clock', 'digital-clock', 'world-clock', 'battery'],
+  rightStack: ['analog-clock', 'world-clock', 'digital-clock', 'battery', 'calendar', 'date', 'weather'],
   worldCities: ['America/New_York', 'Europe/London', 'Asia/Tokyo'],
 };
 
@@ -78,11 +79,9 @@ export function mergeSettings(saved: unknown): Settings {
     }
   }
   // 画面がウィジェットだけになる前（構成バージョン 1）の保存データは、
-  // 左のスタックの先頭にカレンダーを表示するように移行する
+  // 左のスタックの先頭にカレンダーを表示するように移行する（右のスタックはそのまま）
   if (saved.layoutVersion === undefined) {
-    const right = result.rightStack.filter((id) => id !== 'calendar');
     result.leftStack = ['calendar', ...result.leftStack.filter((id) => id !== 'calendar')];
-    result.rightStack = right.length > 0 ? right : [...DEFAULT_SETTINGS.rightStack];
     result.layoutVersion = DEFAULT_SETTINGS.layoutVersion;
   }
   return result;
