@@ -1,0 +1,60 @@
+# CodeQL によるセキュリティスキャン
+#
+# 言語が確定したら `language` に対象（`javascript-typescript`, `python`, `go`,
+# `java-kotlin`, `csharp`, `ruby`, `swift`, `cpp` など）を追加してください。
+# JS/TS ソースファイルが存在する場合のみ実行されます
+# （`hashFiles` はジョブレベルの `if` では使えないため detect ジョブで判定します）。
+
+name: CodeQL
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  schedule:
+    - cron: "17 3 * * 1"
+
+permissions:
+  contents: read
+  security-events: write
+  actions: read
+
+jobs:
+  detect:
+    name: Detect sources
+    runs-on: ubuntu-latest
+    outputs:
+      has-sources: ${{ steps.check.outputs.has-sources }}
+    steps:
+      - uses: actions/checkout@v7
+      - name: JS/TS ソースファイルの有無を判定
+        id: check
+        run: |
+          if [ -n "$(git ls-files '*.ts' '*.tsx' '*.js' '*.jsx' '*.mjs' '*.cjs')" ]; then
+            echo "has-sources=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has-sources=false" >> "$GITHUB_OUTPUT"
+            echo "JS/TS ソースファイルが存在しないため、CodeQL をスキップします"
+          fi
+
+  analyze:
+    name: Analyze (${{ matrix.language }})
+    needs: detect
+    if: needs.detect.outputs.has-sources == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # TODO: 対象言語を必要に応じて変更・追加してください
+        language: [javascript-typescript]
+    steps:
+      - uses: actions/checkout@v7
+      - name: CodeQL を初期化
+        uses: github/codeql-action/init@v4
+        with:
+          languages: ${{ matrix.language }}
+      - name: 自動ビルド
+        uses: github/codeql-action/autobuild@v4
+      - name: 解析を実行
+        uses: github/codeql-action/analyze@v4
+        with:
+          category: "/language:${{ matrix.language }}"
