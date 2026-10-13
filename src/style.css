@@ -199,21 +199,6 @@ input {
   inset: 0;
 }
 
-.pages {
-  display: flex;
-  width: 300vw;
-  height: 100%;
-  transition: transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-
-.page {
-  width: 100vw;
-  height: 100%;
-  flex: none;
-  position: relative;
-  overflow: hidden;
-}
-
 .view {
   position: absolute;
   inset: 0;
@@ -224,8 +209,6 @@ input {
     max(env(safe-area-inset-left), 3vw);
 }
 
-.view-dots,
-.face-dots,
 .stack-dots {
   position: absolute;
   display: flex;
@@ -235,31 +218,16 @@ input {
   pointer-events: none;
 }
 
-.view-dots {
-  left: 50%;
-  bottom: 2.5vh;
-  transform: translateX(-50%);
-}
-
-.face-dots,
 .stack-dots {
   flex-direction: column;
   top: 50%;
   transform: translateY(-50%);
 }
 
-.face-dots {
-  right: 1.5vw;
-}
-
-.view-dots.show,
-.face-dots.show,
 .stack-dots.show {
   opacity: 1;
 }
 
-.view-dots span,
-.face-dots span,
 .stack-dots span {
   width: 7px;
   height: 7px;
@@ -267,8 +235,6 @@ input {
   background: rgba(255, 255, 255, 0.3);
 }
 
-.view-dots span.on,
-.face-dots span.on,
 .stack-dots span.on {
   background: #fff;
 }
@@ -661,263 +627,6 @@ input {
   fill: #fff;
 }
 
-/* ===== 時計（全画面） ===== */
-.view-clock {
-  padding: 0;
-}
-
-.face-holder,
-.face {
-  position: absolute;
-  inset: 0;
-}
-
-.face-analog {
-  display: grid;
-  place-items: center;
-  padding: 4vh;
-}
-
-.face-analog .analog-clock {
-  height: 92vh;
-  max-width: 92vw;
-}
-
-.face-digital {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: 0 4vw;
-  color: var(--accent);
-}
-
-.face-digital-date {
-  font-size: calc(var(--u) * 4.2);
-  font-weight: 600;
-  opacity: 0.85;
-  padding-left: 1vw;
-}
-
-.face-digital-row {
-  display: flex;
-  align-items: baseline;
-  justify-content: center;
-}
-
-.face-digital-time {
-  font-size: min(36vw, 78vh);
-  font-weight: 700;
-  line-height: 0.9;
-  letter-spacing: -0.04em;
-  font-variant-numeric: tabular-nums;
-}
-
-.face-digital-period {
-  font-size: calc(var(--u) * 5);
-  font-weight: 700;
-  margin-left: 1vw;
-}
-
-.face-float {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 2vw;
-  font-family: var(--font-rounded);
-  color: var(--accent);
-}
-
-.float-group {
-  display: flex;
-}
-
-.float-digit {
-  display: inline-block;
-  font-size: min(30vw, 80vh);
-  font-weight: 900;
-  line-height: 0.85;
-  margin: 0 -1.2vw;
-  text-shadow: 0 0.04em 0.12em rgba(0, 0, 0, 0.6);
-  animation: float 6s ease-in-out infinite;
-  mix-blend-mode: screen;
-}
-
-.float-digit-1 {
-  animation-delay: -1.5s;
-  filter: hue-rotate(25deg);
-}
-
-.float-digit-2 {
-  animation-delay: -3s;
-  filter: hue-rotate(-25deg);
-}
-
-.float-digit-3 {
-  animation-delay: -4.5s;
-  filter: hue-rotate(50deg);
-}
-
-.float-digit-empty {
-  display: none;
-}
-
-@keyframes float {
-  0%,
-  100% {
-    transform: translateY(-2%) rotate(-2deg) scale(1);
-  }
-  50% {
-    transform: translateY(2%) rotate(2deg) scale(1.03);
-  }
-}
-
-.face-solar,
-.photo-layer,
-.photo-empty {
-  /* 位置ずらしで画面端に黒い隙間が出ないよう、背景を少しはみ出させる */
-  inset: -8px !important;
-}
-
-.face-solar {
-  background: linear-gradient(180deg, var(--sky-top, #000), var(--sky-bottom, #111));
-  transition: background 2s;
-  overflow: hidden;
-}
-
-.solar-sun {
-  position: absolute;
-  width: 60vh;
-  height: 60vh;
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  background: radial-gradient(circle, var(--sun-glow, transparent) 0%, transparent 65%);
-  transition: left 2s, top 2s;
-}
-
-.face-solar-text {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: 0 6vw;
-}
-
-.face-solar-date {
-  font-size: calc(var(--u) * 4);
-  font-weight: 600;
-  opacity: 0.85;
-}
-
-.face-solar-time {
-  font-size: min(30vw, 66vh);
-  font-weight: 200;
-  line-height: 0.95;
-  letter-spacing: -0.03em;
-  font-variant-numeric: tabular-nums;
-  text-shadow: 0 0 0.2em rgba(0, 0, 0, 0.25);
-}
-
-.face-world {
-  padding: 3vh 3vw;
-}
-
-.world-canvas {
-  position: absolute;
-  inset: 3vh 3vw 3vh 3vw;
-  width: calc(100% - 6vw);
-  height: calc(100% - 6vh);
-}
-
-.face-world-text {
-  position: absolute;
-  left: 5vw;
-  bottom: 5vh;
-}
-
-.face-world-city {
-  color: var(--accent);
-  font-weight: 700;
-  font-size: calc(var(--u) * 4);
-}
-
-.face-world-time {
-  font-size: min(16vw, 34vh);
-  font-weight: 600;
-  line-height: 1;
-  font-variant-numeric: tabular-nums;
-  text-shadow: 0 0 0.3em #000;
-}
-
-/* ===== 写真 ===== */
-.view-photos {
-  padding: 0;
-}
-
-.photo-layer {
-  position: absolute;
-  inset: 0;
-  background-size: cover;
-  background-position: center;
-  opacity: 0;
-  transition: opacity 1.2s ease;
-}
-
-.photo-layer.on {
-  opacity: 1;
-}
-
-.photo-layer.kenburns {
-  animation: kenburns 30s ease-out forwards;
-}
-
-@keyframes kenburns {
-  from {
-    transform: scale(1.08);
-  }
-  to {
-    transform: scale(1);
-  }
-}
-
-.photo-overlay {
-  position: absolute;
-  top: max(4vh, env(safe-area-inset-top));
-  left: max(4vw, env(safe-area-inset-left));
-  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.5);
-}
-
-.photo-date {
-  font-size: calc(var(--u) * 3.4);
-  font-weight: 600;
-}
-
-.photo-time {
-  font-size: min(14vw, 30vh);
-  font-weight: 600;
-  line-height: 1;
-  font-variant-numeric: tabular-nums;
-}
-
-.photo-empty {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-end;
-  padding-bottom: 14vh;
-  gap: 8px;
-  color: var(--muted);
-  background: radial-gradient(circle at 70% 60%, #3a1c71 0%, #1c1c1e 45%, #000 100%);
-}
-
-.photo-empty-title {
-  color: #fff;
-  font-size: 22px;
-  font-weight: 700;
-}
-
 /* ===== シート（編集・設定） ===== */
 .sheet {
   position: fixed;
@@ -1084,35 +793,6 @@ input {
 
 .row-button-danger {
   color: var(--red);
-}
-
-.swatches {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  padding: 12px;
-  background: var(--card-2);
-  border-radius: 10px;
-}
-
-.swatch {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  border: 3px solid transparent;
-  cursor: pointer;
-}
-
-.swatch.on {
-  border-color: #fff;
-  box-shadow: 0 0 0 2px #000 inset;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .float-digit,
-  .photo-layer.kenburns {
-    animation: none;
-  }
 }
 
 /* display 指定のある要素でも hidden 属性で隠せるようにする */

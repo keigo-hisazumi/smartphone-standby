@@ -1,6 +1,6 @@
 import type { Component } from '../dom';
 
-/** スタンバイの 3 画面（ウィジェット・写真・時計）の共通インターフェース */
+/** スタンバイ画面（ウィジェット）のインターフェース */
 export interface StandbyView extends Component {
   onVerticalSwipe(direction: 'up' | 'down', x: number): void;
   onLongPress(): void;

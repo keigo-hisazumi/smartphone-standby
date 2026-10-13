@@ -1,4 +1,4 @@
-// アナログ時計（ウィジェットと全画面の文字盤で共用）の SVG 部品
+// アナログ時計ウィジェットの SVG 部品
 
 import { s } from './dom';
 import { handAngles } from './time';
