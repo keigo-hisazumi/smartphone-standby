@@ -73,7 +73,7 @@ class SmartStack {
 
 export function createWidgetsView(ctx: WidgetContext, store: SettingsStore, actions: ViewActions): StandbyView {
   const left = new SmartStack(ctx);
-  const right = new SmartStack(ctx, 'analog-clock');
+  const right = new SmartStack(ctx, 'weather');
   const el = h('div', { class: 'view view-widgets' }, [left.el, right.el]);
   const sync = () => {
     left.setIds(store.get().leftStack);
