@@ -295,13 +295,15 @@ input {
 /* ===== ウィジェット ===== */
 .view-widgets {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 3vw;
 }
 
 .stack {
   position: relative;
   overflow: hidden;
+  /* ウィジェットの中身をスタックの大きさに合わせられるようにする（cqw / cqh） */
+  container-type: size;
   border-radius: calc(var(--u) * 6);
 }
 
@@ -354,26 +356,35 @@ input {
 
 .wd-time {
   font-size: calc(var(--u) * 17);
+  /* 「23:59」がカードの幅に収まる大きさまでにする */
+  font-size: min(calc(var(--u) * 17), calc((100cqw - var(--u) * 7) / 2.9));
+  white-space: nowrap;
   font-weight: 700;
   line-height: 1;
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.03em;
 }
 
+.widget-calendar {
+  font-size: calc(var(--u) * 3.1);
+  /* カードの幅（7 列 × 1.9em）と高さ（月名 + 曜日 + 最大 6 週）に収まる大きさにする。
+     iPhone の横向きなど safe-area で横幅が狭くなっても見切れないようにする */
+  font-size: min(calc((100cqw - var(--u) * 7) / 14), calc((100cqh - var(--u) * 7) / 15.5));
+}
+
 .wc-title {
   color: var(--red);
   font-weight: 700;
-  font-size: calc(var(--u) * 3.6);
-  margin-bottom: calc(var(--u) * 1.2);
+  font-size: 1.16em;
+  margin-bottom: 0.4em;
 }
 
 .wc-grid {
   flex: 1;
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(7, minmax(0, 1fr));
   align-items: center;
   justify-items: center;
-  font-size: calc(var(--u) * 3.1);
   font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
