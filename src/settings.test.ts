@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { DEFAULT_SETTINGS, mergeSettings } from './settings';
+import { DEFAULT_SETTINGS, mergeSettings, sortWidgets, WIDGET_ORDER } from './settings';
 
 describe('mergeSettings', () => {
   it('保存データがなければ既定値', () => {
@@ -8,23 +8,70 @@ describe('mergeSettings', () => {
   });
 
   it('保存済みの値で上書きし、型が違う値や未知の項目は捨てる', () => {
-    const s = mergeSettings({ hour12: true, sleepAfterSec: '60', unknown: 1, leftStack: ['date'] });
+    const s = mergeSettings({ layoutVersion: 5, hour12: true, sleepAfterSec: '60', unknown: 1, leftStack: ['date'] });
     expect(s.hour12).toBe(true);
     expect(s.sleepAfterSec).toBe(DEFAULT_SETTINGS.sleepAfterSec);
     expect(s.leftStack).toEqual(['date']);
     expect('unknown' in s).toBe(false);
   });
 
-  it('文字盤の色は項目ごとにマージする', () => {
-    const s = mergeSettings({ clockColors: { digital: '#ffffff', analog: 3 } });
-    expect(s.clockColors.digital).toBe('#ffffff');
-    expect(s.clockColors.analog).toBe(DEFAULT_SETTINGS.clockColors.analog);
+  it('既定では左右どちらのスタックにも全ウィジェットを同じ順番で表示し、先頭はカレンダー', () => {
+    expect(DEFAULT_SETTINGS.leftStack).toEqual(WIDGET_ORDER);
+    expect(DEFAULT_SETTINGS.rightStack).toEqual(WIDGET_ORDER);
+    expect(WIDGET_ORDER[0]).toBe('calendar');
   });
 
+  it('旧バージョンの保存データは左右どちらにも全ウィジェットを同じ順番で並べる', () => {
+    const s = mergeSettings({
+      view: 'photos',
+      leftStack: ['analog-clock', 'world-clock', 'digital-clock', 'battery'],
+      rightStack: ['calendar', 'date', 'weather'],
+    });
+    expect(s.leftStack).toEqual(WIDGET_ORDER);
+    expect(s.rightStack).toEqual(WIDGET_ORDER);
+    expect(s.layoutVersion).toBe(DEFAULT_SETTINGS.layoutVersion);
+    expect('view' in s).toBe(false);
+  });
+
+  it('左右で順番が異なる保存データは、選択を維持したまま同じ順番に揃える', () => {
+    const s = mergeSettings({
+      layoutVersion: 3,
+      leftStack: ['calendar', 'date', 'weather', 'analog-clock', 'digital-clock', 'world-clock', 'battery'],
+      rightStack: ['analog-clock', 'world-clock', 'digital-clock', 'battery', 'calendar', 'date', 'weather'],
+    });
+    expect(s.leftStack).toEqual(WIDGET_ORDER);
+    expect(s.rightStack).toEqual(WIDGET_ORDER);
+    const partial = mergeSettings({ layoutVersion: 5, leftStack: ['battery', 'calendar'], rightStack: ['weather', 'date'] });
+    expect(partial.leftStack).toEqual(['calendar', 'battery']);
+    expect(partial.rightStack).toEqual(['date', 'weather']);
+  });
+
+  it('天気は既定でオン。旧バージョンの保存データもオンにし、移行後のオフは維持する', () => {
+    expect(DEFAULT_SETTINGS.weatherEnabled).toBe(true);
+    expect(mergeSettings({ layoutVersion: 4, weatherEnabled: false }).weatherEnabled).toBe(true);
+    expect(mergeSettings({ weatherEnabled: false }).weatherEnabled).toBe(true);
+    expect(mergeSettings({ layoutVersion: 5, weatherEnabled: false }).weatherEnabled).toBe(false);
+  });
+
+  it('未知のウィジェットしかない保存データは既定値に戻す', () => {
+    const s = mergeSettings({ layoutVersion: 5, leftStack: ['photos'], rightStack: [] });
+    expect(s.leftStack).toEqual(WIDGET_ORDER);
+    expect(s.rightStack).toEqual(WIDGET_ORDER);
+  });
+});
+
+describe('sortWidgets', () => {
+  it('WIDGET_ORDER の順に並べ、重複と未知の ID を除く', () => {
+    expect(sortWidgets(['battery', 'calendar', 'battery', 'unknown'])).toEqual(['calendar', 'battery']);
+  });
+});
+
+describe('mergeSettings（既定値の保護）', () => {
   it('既定値オブジェクトを書き換えない', () => {
+    const before = [...DEFAULT_SETTINGS.leftStack];
     const s = mergeSettings({});
     s.leftStack.push('date');
-    expect(DEFAULT_SETTINGS.leftStack).toEqual(['analog-clock', 'world-clock', 'digital-clock', 'battery']);
+    expect(DEFAULT_SETTINGS.leftStack).toEqual(before);
     expect(s.leftStack).not.toBe(DEFAULT_SETTINGS.leftStack);
   });
 });

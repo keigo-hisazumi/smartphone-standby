@@ -2,8 +2,8 @@
 
 import { h, type Component } from '../dom';
 import { buttonRow, openSheet, section, toggleRow } from '../sheet';
-import type { SettingsStore, WidgetId } from '../settings';
-import { WIDGET_IDS, WIDGETS, type WidgetContext } from '../widgets';
+import { sortWidgets, WIDGET_ORDER, type SettingsStore, type WidgetId } from '../settings';
+import { WIDGETS, type WidgetContext } from '../widgets';
 import type { StandbyView, ViewActions } from './types';
 
 /** スマートローテーションで次のウィジェットに切り替える間隔 */
@@ -19,18 +19,25 @@ class SmartStack {
   private dotsTimer: number | undefined;
   private lastChange = Date.now();
 
-  constructor(private ctx: WidgetContext) {
+  /** initialId: 最初に表示するウィジェット（左右で同じ順番でも、最初は別のウィジェットを見せるため） */
+  constructor(
+    private ctx: WidgetContext,
+    private initialId?: WidgetId,
+  ) {
     this.el.append(this.track, this.dots);
   }
 
   setIds(ids: WidgetId[]): void {
     if (ids.join() === this.ids.join()) return;
     for (const item of this.items) item.destroy?.();
+    // 並びが変わっても、表示中のウィジェットを表示し続ける
+    const current = this.ids[this.index] ?? this.initialId;
     this.ids = [...ids];
     this.items = ids.map((id) => WIDGETS[id].create(this.ctx));
     this.track.replaceChildren(...this.items.map((i) => h('div', { class: 'stack-item' }, [i.el])));
     this.dots.replaceChildren(...this.items.map(() => h('span')));
-    this.index = Math.min(this.index, Math.max(0, this.items.length - 1));
+    const kept = current ? ids.indexOf(current) : -1;
+    this.index = kept >= 0 ? kept : Math.min(this.index, Math.max(0, this.items.length - 1));
     this.layout();
   }
 
@@ -66,7 +73,7 @@ class SmartStack {
 
 export function createWidgetsView(ctx: WidgetContext, store: SettingsStore, actions: ViewActions): StandbyView {
   const left = new SmartStack(ctx);
-  const right = new SmartStack(ctx);
+  const right = new SmartStack(ctx, 'weather');
   const el = h('div', { class: 'view view-widgets' }, [left.el, right.el]);
   const sync = () => {
     left.setIds(store.get().leftStack);
@@ -80,10 +87,11 @@ export function createWidgetsView(ctx: WidgetContext, store: SettingsStore, acti
   const stackEditor = (title: string, key: 'leftStack' | 'rightStack') =>
     section(
       title,
-      WIDGET_IDS.map((id) =>
+      WIDGET_ORDER.map((id) =>
         toggleRow(WIDGETS[id].name, store.get()[key].includes(id), (on) => {
           const rest = store.get()[key].filter((x) => x !== id);
-          const next = on ? [...rest, id] : rest;
+          // 左右で同じ順番になるように、常に WIDGET_ORDER の順に並べる
+          const next = sortWidgets(on ? [...rest, id] : rest);
           // 空のスタックにはしない
           if (next.length > 0) store.set({ [key]: next });
         }),
@@ -106,6 +114,7 @@ export function createWidgetsView(ctx: WidgetContext, store: SettingsStore, acti
     onLongPress() {
       const sheet = openSheet('ウィジェットを編集');
       sheet.body.append(
+        section('', [h('div', { class: 'row-note', text: '同じウィジェットを左右どちらのスタックにも、同じ順番で表示できます。' })]),
         stackEditor('左のスタック', 'leftStack'),
         stackEditor('右のスタック', 'rightStack'),
         section('スマートスタック', [

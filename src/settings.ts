@@ -1,8 +1,14 @@
 // 設定の定義と永続化（localStorage）
 
-export type ViewId = 'widgets' | 'photos' | 'clock';
-export type ClockFaceId = 'analog' | 'digital' | 'world' | 'solar' | 'float';
 export type WidgetId = 'analog-clock' | 'digital-clock' | 'calendar' | 'date' | 'world-clock' | 'battery' | 'weather';
+/** スタックに並べるウィジェットの順番。左右のスタックで共通 */
+export const WIDGET_ORDER: WidgetId[] = ['calendar', 'date', 'weather', 'analog-clock', 'digital-clock', 'world-clock', 'battery'];
+
+/** ids を WIDGET_ORDER の順に並べ替える（重複・未知の ID は除く） */
+export function sortWidgets(ids: readonly string[]): WidgetId[] {
+  return WIDGET_ORDER.filter((id) => ids.includes(id));
+}
+
 export type NightMode = 'auto' | 'on' | 'off';
 
 export interface Settings {
@@ -29,11 +35,8 @@ export interface Settings {
   smartRotate: boolean;
   /** 天気ウィジェットで位置情報と Open-Meteo を使う */
   weatherEnabled: boolean;
-  /** 写真の切り替え間隔（秒） */
-  photoIntervalSec: number;
-  view: ViewId;
-  clockFace: ClockFaceId;
-  clockColors: Record<ClockFaceId, string>;
+  /** 保存データの構成バージョン。古いデータを読み込んだ時の移行に使う */
+  layoutVersion: number;
   leftStack: WidgetId[];
   rightStack: WidgetId[];
   worldCities: string[];
@@ -52,19 +55,11 @@ export const DEFAULT_SETTINGS: Settings = {
   burnInProtection: true,
   hour12: false,
   smartRotate: true,
-  weatherEnabled: false,
-  photoIntervalSec: 15,
-  view: 'clock',
-  clockFace: 'analog',
-  clockColors: {
-    analog: '#ff9f0a',
-    digital: '#ff453a',
-    world: '#ffd60a',
-    solar: '#ffffff',
-    float: '#64d2ff',
-  },
-  leftStack: ['analog-clock', 'world-clock', 'digital-clock', 'battery'],
-  rightStack: ['calendar', 'date', 'weather'],
+  weatherEnabled: true,
+  layoutVersion: 5,
+  // 左右のスタックにはすべてのウィジェットを同じ順番で表示できる。既定では両方に全ウィジェットを入れる
+  leftStack: [...WIDGET_ORDER],
+  rightStack: [...WIDGET_ORDER],
   worldCities: ['America/New_York', 'Europe/London', 'Asia/Tokyo'],
 };
 
@@ -87,18 +82,24 @@ export function mergeSettings(saved: unknown): Settings {
     if (value === undefined) continue;
     if (Array.isArray(def)) {
       if (Array.isArray(value) && value.every((v) => typeof v === 'string')) target[key] = [...value];
-    } else if (isObject(def)) {
-      if (isObject(value)) {
-        const merged = { ...def };
-        for (const k of Object.keys(def)) {
-          if (typeof value[k] === typeof def[k]) merged[k] = value[k];
-        }
-        target[key] = merged;
-      }
     } else if (typeof value === typeof def) {
       target[key] = value;
     }
   }
+  const version = typeof saved.layoutVersion === 'number' ? saved.layoutVersion : 1;
+  // 構成バージョン 3 より前の保存データは、左右どちらのスタックにも全ウィジェットが並ぶように移行する
+  if (version < 3) {
+    result.leftStack = [...WIDGET_ORDER];
+    result.rightStack = [...WIDGET_ORDER];
+  }
+  // 左右で順番が異なる保存データは WIDGET_ORDER の順に揃える（表示するウィジェットの選択は維持）
+  // 天気が既定でオフだった頃（構成バージョン 5 より前）の保存データは、天気をオンにする
+  if (version < 5) result.weatherEnabled = true;
+  result.leftStack = sortWidgets(result.leftStack);
+  result.rightStack = sortWidgets(result.rightStack);
+  if (result.leftStack.length === 0) result.leftStack = [...WIDGET_ORDER];
+  if (result.rightStack.length === 0) result.rightStack = [...WIDGET_ORDER];
+  result.layoutVersion = DEFAULT_SETTINGS.layoutVersion;
   return result;
 }
 

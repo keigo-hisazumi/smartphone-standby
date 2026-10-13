@@ -57,7 +57,7 @@ export class App {
       h('div', { class: 'launcher-actions' }, [startButton, settingsButton]),
       this.pwaBox,
       h('p', { class: 'launcher-tips' }, [
-        '操作: 左右スワイプで「ウィジェット / 写真 / 時計」、上下スワイプで切り替え、長押しで編集。',
+        '操作: 左右のスタックを上下スワイプでウィジェットを切り替え、長押しで編集。',
       ]),
     ]);
     this.root.append(this.launcher, this.standby.el);
