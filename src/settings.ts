@@ -48,7 +48,7 @@ export const DEFAULT_SETTINGS: Settings = {
   hour12: false,
   smartRotate: true,
   weatherEnabled: false,
-  layoutVersion: 2,
+  layoutVersion: 3,
   // 左右のスタックにはすべてのウィジェットを表示できる。既定では両方に全ウィジェットを入れ、先頭だけ変える
   leftStack: ['calendar', 'date', 'weather', 'analog-clock', 'digital-clock', 'world-clock', 'battery'],
   rightStack: ['analog-clock', 'world-clock', 'digital-clock', 'battery', 'calendar', 'date', 'weather'],
@@ -78,13 +78,20 @@ export function mergeSettings(saved: unknown): Settings {
       target[key] = value;
     }
   }
-  // 画面がウィジェットだけになる前（構成バージョン 1）の保存データは、
-  // 左のスタックの先頭にカレンダーを表示するように移行する（右のスタックはそのまま）
-  if (saved.layoutVersion === undefined) {
-    result.leftStack = ['calendar', ...result.leftStack.filter((id) => id !== 'calendar')];
+  // 構成バージョン 3 より前の保存データは、左右どちらのスタックにも全ウィジェットが並ぶように移行する。
+  // 保存済みの並びは残し、足りないウィジェットを既定の順で後ろに追加する（左の先頭はカレンダー）
+  const version = typeof saved.layoutVersion === 'number' ? saved.layoutVersion : 1;
+  if (version < 3) {
+    result.leftStack = withAllWidgets(['calendar', ...result.leftStack], DEFAULT_SETTINGS.leftStack);
+    result.rightStack = withAllWidgets(result.rightStack, DEFAULT_SETTINGS.rightStack);
     result.layoutVersion = DEFAULT_SETTINGS.layoutVersion;
   }
   return result;
+}
+
+/** 重複を除いた ids の後ろに、all のうち含まれていないものを追加する */
+function withAllWidgets(ids: WidgetId[], all: WidgetId[]): WidgetId[] {
+  return [...new Set([...ids, ...all])];
 }
 
 type Listener = (settings: Settings, changed: (keyof Settings)[]) => void;

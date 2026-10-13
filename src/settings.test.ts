@@ -8,7 +8,7 @@ describe('mergeSettings', () => {
   });
 
   it('保存済みの値で上書きし、型が違う値や未知の項目は捨てる', () => {
-    const s = mergeSettings({ layoutVersion: 2, hour12: true, sleepAfterSec: '60', unknown: 1, leftStack: ['date'] });
+    const s = mergeSettings({ layoutVersion: 3, hour12: true, sleepAfterSec: '60', unknown: 1, leftStack: ['date'] });
     expect(s.hour12).toBe(true);
     expect(s.sleepAfterSec).toBe(DEFAULT_SETTINGS.sleepAfterSec);
     expect(s.leftStack).toEqual(['date']);
@@ -21,20 +21,29 @@ describe('mergeSettings', () => {
     expect([...DEFAULT_SETTINGS.leftStack].sort()).toEqual([...DEFAULT_SETTINGS.rightStack].sort());
   });
 
-  it('旧バージョンの保存データは左のスタックの先頭にカレンダーを追加し、右はそのまま', () => {
+  it('旧バージョンの保存データは左右どちらにも全ウィジェットが並ぶように移行する', () => {
     const s = mergeSettings({
       view: 'photos',
-      leftStack: ['analog-clock', 'battery'],
-      rightStack: ['calendar', 'date'],
+      leftStack: ['analog-clock', 'world-clock', 'digital-clock', 'battery'],
+      rightStack: ['calendar', 'date', 'weather'],
     });
-    expect(s.leftStack).toEqual(['calendar', 'analog-clock', 'battery']);
-    expect(s.rightStack).toEqual(['calendar', 'date']);
+    expect(s.leftStack).toEqual(['calendar', 'analog-clock', 'world-clock', 'digital-clock', 'battery', 'date', 'weather']);
+    expect(s.rightStack).toEqual(['calendar', 'date', 'weather', 'analog-clock', 'world-clock', 'digital-clock', 'battery']);
+    expect(s.leftStack).toHaveLength(DEFAULT_SETTINGS.leftStack.length);
     expect(s.layoutVersion).toBe(DEFAULT_SETTINGS.layoutVersion);
     expect('view' in s).toBe(false);
   });
 
+  it('構成バージョン 2 の保存データも左右に全ウィジェットを追加する', () => {
+    const s = mergeSettings({ layoutVersion: 2, leftStack: ['calendar', 'date'], rightStack: ['battery'] });
+    expect([...s.leftStack].sort()).toEqual([...DEFAULT_SETTINGS.leftStack].sort());
+    expect(s.leftStack.slice(0, 2)).toEqual(['calendar', 'date']);
+    expect([...s.rightStack].sort()).toEqual([...DEFAULT_SETTINGS.rightStack].sort());
+    expect(s.rightStack[0]).toBe('battery');
+  });
+
   it('移行済みの保存データは並びを変えない', () => {
-    const s = mergeSettings({ layoutVersion: 2, leftStack: ['date'], rightStack: ['calendar'] });
+    const s = mergeSettings({ layoutVersion: 3, leftStack: ['date'], rightStack: ['calendar'] });
     expect(s.leftStack).toEqual(['date']);
     expect(s.rightStack).toEqual(['calendar']);
   });
