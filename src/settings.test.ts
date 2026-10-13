@@ -8,7 +8,7 @@ describe('mergeSettings', () => {
   });
 
   it('保存済みの値で上書きし、型が違う値や未知の項目は捨てる', () => {
-    const s = mergeSettings({ layoutVersion: 4, hour12: true, sleepAfterSec: '60', unknown: 1, leftStack: ['date'] });
+    const s = mergeSettings({ layoutVersion: 5, hour12: true, sleepAfterSec: '60', unknown: 1, leftStack: ['date'] });
     expect(s.hour12).toBe(true);
     expect(s.sleepAfterSec).toBe(DEFAULT_SETTINGS.sleepAfterSec);
     expect(s.leftStack).toEqual(['date']);
@@ -41,13 +41,20 @@ describe('mergeSettings', () => {
     });
     expect(s.leftStack).toEqual(WIDGET_ORDER);
     expect(s.rightStack).toEqual(WIDGET_ORDER);
-    const partial = mergeSettings({ layoutVersion: 4, leftStack: ['battery', 'calendar'], rightStack: ['weather', 'date'] });
+    const partial = mergeSettings({ layoutVersion: 5, leftStack: ['battery', 'calendar'], rightStack: ['weather', 'date'] });
     expect(partial.leftStack).toEqual(['calendar', 'battery']);
     expect(partial.rightStack).toEqual(['date', 'weather']);
   });
 
+  it('天気は既定でオン。旧バージョンの保存データもオンにし、移行後のオフは維持する', () => {
+    expect(DEFAULT_SETTINGS.weatherEnabled).toBe(true);
+    expect(mergeSettings({ layoutVersion: 4, weatherEnabled: false }).weatherEnabled).toBe(true);
+    expect(mergeSettings({ weatherEnabled: false }).weatherEnabled).toBe(true);
+    expect(mergeSettings({ layoutVersion: 5, weatherEnabled: false }).weatherEnabled).toBe(false);
+  });
+
   it('未知のウィジェットしかない保存データは既定値に戻す', () => {
-    const s = mergeSettings({ layoutVersion: 4, leftStack: ['photos'], rightStack: [] });
+    const s = mergeSettings({ layoutVersion: 5, leftStack: ['photos'], rightStack: [] });
     expect(s.leftStack).toEqual(WIDGET_ORDER);
     expect(s.rightStack).toEqual(WIDGET_ORDER);
   });

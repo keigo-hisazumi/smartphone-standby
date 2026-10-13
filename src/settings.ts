@@ -55,8 +55,8 @@ export const DEFAULT_SETTINGS: Settings = {
   burnInProtection: true,
   hour12: false,
   smartRotate: true,
-  weatherEnabled: false,
-  layoutVersion: 4,
+  weatherEnabled: true,
+  layoutVersion: 5,
   // 左右のスタックにはすべてのウィジェットを同じ順番で表示できる。既定では両方に全ウィジェットを入れる
   leftStack: [...WIDGET_ORDER],
   rightStack: [...WIDGET_ORDER],
@@ -93,6 +93,8 @@ export function mergeSettings(saved: unknown): Settings {
     result.rightStack = [...WIDGET_ORDER];
   }
   // 左右で順番が異なる保存データは WIDGET_ORDER の順に揃える（表示するウィジェットの選択は維持）
+  // 天気が既定でオフだった頃（構成バージョン 5 より前）の保存データは、天気をオンにする
+  if (version < 5) result.weatherEnabled = true;
   result.leftStack = sortWidgets(result.leftStack);
   result.rightStack = sortWidgets(result.rightStack);
   if (result.leftStack.length === 0) result.leftStack = [...WIDGET_ORDER];
