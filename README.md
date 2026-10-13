@@ -18,7 +18,7 @@ iOS の仕様の洗い出しと、Web での再現方針は [`docs/standby-spec.
 ## 使い方
 
 1. スマートフォンのブラウザで公開 URL（GitHub Pages）を開く
-2. 可能であれば「ホーム画面に追加」する（iPhone では全画面表示になります）
+2. 可能であれば「ホーム画面に追加」する（Android は起動画面の「ホーム画面に追加」ボタン、iPhone は共有ボタンから。全画面・オフラインで使えます）
 3. 充電ケーブルをつないで横向きに置く（または「スタンバイを開始」をタップ）
 
 | 操作 | 動作 |
@@ -54,7 +54,8 @@ src/
   clock/faces.ts    時計の文字盤 5 種類
   solar.ts          太陽位置の計算（ソーラー・ワールド文字盤）
   settings.ts       設定と localStorage への保存
-public/             manifest・アイコン・Service Worker
+src/pwa.ts          PWA（Service Worker の登録・更新通知、ホーム画面への追加の案内）
+public/             manifest・アイコン・Service Worker（ビルド時にプリキャッシュ一覧を埋め込む）
 docs/standby-spec.md  iOS スタンバイの仕様と再現方針
 ```
 

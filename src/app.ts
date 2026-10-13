@@ -5,6 +5,7 @@ import { h, setText } from './dom';
 import { shouldAutoExit, shouldAutoStart, type DeviceState } from './rules';
 import { SettingsStore } from './settings';
 import { openSettingsPanel } from './settingsPanel';
+import type { PwaController } from './pwa';
 import { Standby } from './standby';
 import { formatDateLong, formatTime } from './time';
 
@@ -21,11 +22,15 @@ export class App {
     auto: h('span', { class: 'chip' }),
     hint: h('p', { class: 'launcher-hint' }),
   };
+  private pwaBox = h('div', { class: 'pwa-box' });
   private prevState: DeviceState | null = null;
   /** 手動で終了した後、条件を満たしたままでも再開しないためのフラグ */
   private suppressAuto = false;
 
-  constructor(private root: HTMLElement) {
+  constructor(
+    private root: HTMLElement,
+    private pwa: PwaController,
+  ) {
     this.standby = new Standby({
       store: this.store,
       device: this.device,
@@ -50,6 +55,7 @@ export class App {
       h('div', { class: 'chips' }, [this.status.charging, this.status.orientation, this.status.auto]),
       this.status.hint,
       h('div', { class: 'launcher-actions' }, [startButton, settingsButton]),
+      this.pwaBox,
       h('p', { class: 'launcher-tips' }, [
         '操作: 左右スワイプで「ウィジェット / 写真 / 時計」、上下スワイプで切り替え、長押しで編集。',
       ]),
@@ -61,7 +67,9 @@ export class App {
     await this.device.init();
     this.device.subscribe(() => this.onDeviceChange());
     this.store.subscribe(() => this.onDeviceChange());
+    this.pwa.subscribe(() => this.renderPwa());
     this.onDeviceChange();
+    this.renderPwa();
     this.loop();
   }
 
@@ -106,6 +114,33 @@ export class App {
           : '横向きに置くと、自動でスタンバイが始まります。'
         : '「スタンバイを開始」をタップすると表示します。',
     );
+  }
+
+  /** 更新のお知らせと、ホーム画面への追加の案内を描画する */
+  private renderPwa(): void {
+    const items: HTMLElement[] = [];
+    if (this.pwa.updateReady) {
+      const button = h('button', { class: 'pwa-button', text: '更新', attrs: { type: 'button' } });
+      button.addEventListener('click', () => this.pwa.applyUpdate());
+      items.push(h('div', { class: 'pwa-notice' }, [h('span', { text: '新しいバージョンがあります' }), button]));
+    }
+    const mode = this.pwa.installMode;
+    if (mode === 'prompt') {
+      const button = h('button', { class: 'pwa-button', text: 'ホーム画面に追加', attrs: { type: 'button' } });
+      button.addEventListener('click', () => void this.pwa.install());
+      items.push(
+        h('div', { class: 'pwa-notice' }, [h('span', { text: 'アプリとして追加すると全画面・オフラインで使えます' }), button]),
+      );
+    } else if (mode === 'ios-manual') {
+      items.push(
+        h('p', {
+          class: 'pwa-hint',
+          text: '共有ボタン →「ホーム画面に追加」でアプリとして追加すると、全画面・オフラインで使えます。',
+        }),
+      );
+    }
+    this.pwaBox.replaceChildren(...items);
+    this.pwaBox.hidden = items.length === 0;
   }
 
   private loop(): void {
