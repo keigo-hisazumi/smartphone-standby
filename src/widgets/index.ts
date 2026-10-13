@@ -213,5 +213,3 @@ export const WIDGETS: Record<WidgetId, WidgetDefinition> = {
   battery: { id: 'battery', name: 'バッテリー', create: batteryWidget },
   weather: { id: 'weather', name: '天気', create: weatherWidget },
 };
-
-export const WIDGET_IDS = Object.keys(WIDGETS) as WidgetId[];

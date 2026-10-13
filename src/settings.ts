@@ -1,6 +1,14 @@
 // 設定の定義と永続化（localStorage）
 
 export type WidgetId = 'analog-clock' | 'digital-clock' | 'calendar' | 'date' | 'world-clock' | 'battery' | 'weather';
+/** スタックに並べるウィジェットの順番。左右のスタックで共通 */
+export const WIDGET_ORDER: WidgetId[] = ['calendar', 'date', 'weather', 'analog-clock', 'digital-clock', 'world-clock', 'battery'];
+
+/** ids を WIDGET_ORDER の順に並べ替える（重複・未知の ID は除く） */
+export function sortWidgets(ids: readonly string[]): WidgetId[] {
+  return WIDGET_ORDER.filter((id) => ids.includes(id));
+}
+
 export type NightMode = 'auto' | 'on' | 'off';
 
 export interface Settings {
@@ -48,10 +56,10 @@ export const DEFAULT_SETTINGS: Settings = {
   hour12: false,
   smartRotate: true,
   weatherEnabled: false,
-  layoutVersion: 3,
-  // 左右のスタックにはすべてのウィジェットを表示できる。既定では両方に全ウィジェットを入れ、先頭だけ変える
-  leftStack: ['calendar', 'date', 'weather', 'analog-clock', 'digital-clock', 'world-clock', 'battery'],
-  rightStack: ['analog-clock', 'world-clock', 'digital-clock', 'battery', 'calendar', 'date', 'weather'],
+  layoutVersion: 4,
+  // 左右のスタックにはすべてのウィジェットを同じ順番で表示できる。既定では両方に全ウィジェットを入れる
+  leftStack: [...WIDGET_ORDER],
+  rightStack: [...WIDGET_ORDER],
   worldCities: ['America/New_York', 'Europe/London', 'Asia/Tokyo'],
 };
 
@@ -78,20 +86,19 @@ export function mergeSettings(saved: unknown): Settings {
       target[key] = value;
     }
   }
-  // 構成バージョン 3 より前の保存データは、左右どちらのスタックにも全ウィジェットが並ぶように移行する。
-  // 保存済みの並びは残し、足りないウィジェットを既定の順で後ろに追加する（左の先頭はカレンダー）
   const version = typeof saved.layoutVersion === 'number' ? saved.layoutVersion : 1;
+  // 構成バージョン 3 より前の保存データは、左右どちらのスタックにも全ウィジェットが並ぶように移行する
   if (version < 3) {
-    result.leftStack = withAllWidgets(['calendar', ...result.leftStack], DEFAULT_SETTINGS.leftStack);
-    result.rightStack = withAllWidgets(result.rightStack, DEFAULT_SETTINGS.rightStack);
-    result.layoutVersion = DEFAULT_SETTINGS.layoutVersion;
+    result.leftStack = [...WIDGET_ORDER];
+    result.rightStack = [...WIDGET_ORDER];
   }
+  // 左右で順番が異なる保存データは WIDGET_ORDER の順に揃える（表示するウィジェットの選択は維持）
+  result.leftStack = sortWidgets(result.leftStack);
+  result.rightStack = sortWidgets(result.rightStack);
+  if (result.leftStack.length === 0) result.leftStack = [...WIDGET_ORDER];
+  if (result.rightStack.length === 0) result.rightStack = [...WIDGET_ORDER];
+  result.layoutVersion = DEFAULT_SETTINGS.layoutVersion;
   return result;
-}
-
-/** 重複を除いた ids の後ろに、all のうち含まれていないものを追加する */
-function withAllWidgets(ids: WidgetId[], all: WidgetId[]): WidgetId[] {
-  return [...new Set([...ids, ...all])];
 }
 
 type Listener = (settings: Settings, changed: (keyof Settings)[]) => void;
