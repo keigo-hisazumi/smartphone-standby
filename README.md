@@ -2,6 +2,8 @@
 
 iOS 17 の **スタンバイ（StandBy）** を、**どのスマートフォンでも** ブラウザで表示できるようにした Web アプリ（PWA）です。充電しながら横向きに置くと、自動でウィジェットの全画面表示に切り替わります。
 
+**公開 URL**: <https://keigo-hisazumi.github.io/smartphone-standby/>
+
 iOS の仕様の洗い出しと、Web での再現方針は [`docs/standby-spec.md`](./docs/standby-spec.md) にまとめています。
 
 ## 主な機能
@@ -16,7 +18,7 @@ iOS の仕様の洗い出しと、Web での再現方針は [`docs/standby-spec.
 
 ## 使い方
 
-1. スマートフォンのブラウザで公開 URL（GitHub Pages）を開く
+1. スマートフォンのブラウザで公開 URL を開く: <https://keigo-hisazumi.github.io/smartphone-standby/>
 2. 可能であれば「ホーム画面に追加」する（Android は起動画面の「ホーム画面に追加」ボタン、iPhone は共有ボタンから。全画面・オフラインで使えます）
 3. 充電ケーブルをつないで横向きに置く（または「スタンバイを開始」をタップ）
 
