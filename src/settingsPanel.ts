@@ -70,6 +70,12 @@ export function openSettingsPanel(store: SettingsStore, batterySupported: boolea
     ]),
     section('表示', [
       toggleRow('12 時間表示', s.hour12, (v) => set({ hour12: v })),
+      toggleRow(
+        'ウィジェットを自動で切り替え',
+        s.smartRotate,
+        (v) => set({ smartRotate: v }),
+        'オンにすると 10 分ごとに次のウィジェットへ切り替えます。オフにすると上下スワイプした時だけ切り替わります',
+      ),
       toggleRow('天気を表示', s.weatherEnabled, (v) => set({ weatherEnabled: v }), '位置情報を使い Open-Meteo から取得します'),
     ]),
   );
