@@ -55,7 +55,9 @@ class SmartStack {
   }
 
   maybeRotate(now: Date, enabled: boolean): void {
-    if (enabled && now.getTime() - this.lastChange > SMART_ROTATE_MS) this.step(1, false);
+    // オフの間は経過時間を数えない（オンに戻した直後にいきなり切り替わらないようにする）
+    if (!enabled) this.lastChange = now.getTime();
+    else if (now.getTime() - this.lastChange > SMART_ROTATE_MS) this.step(1, false);
   }
 
   update(now: Date): void {
