@@ -7,9 +7,8 @@ export interface DeviceState {
   landscape: boolean;
 }
 
-/** 横向きになったらスタンバイに入るかを判定する（充電状態は監視しない） */
-export function shouldAutoStart(device: DeviceState, settings: Pick<Settings, 'autoStart'>): boolean {
-  if (!settings.autoStart) return false;
+/** 横向きになったらスタンバイに入るかを判定する（充電状態は監視せず、常に自動で開始する） */
+export function shouldAutoStart(device: DeviceState): boolean {
   return device.landscape;
 }
 

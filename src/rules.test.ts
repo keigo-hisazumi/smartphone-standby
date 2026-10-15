@@ -4,18 +4,12 @@ import { burnInOffset, isInNightWindow, isNightActive, shouldAutoExit, shouldAut
 const at = (h: number, m = 0) => new Date(2026, 9, 13, h, m);
 
 describe('shouldAutoStart', () => {
-  const settings = { autoStart: true };
-
   it('横向きで開始する', () => {
-    expect(shouldAutoStart({ landscape: true }, settings)).toBe(true);
+    expect(shouldAutoStart({ landscape: true })).toBe(true);
   });
 
   it('縦向きでは開始しない', () => {
-    expect(shouldAutoStart({ landscape: false }, settings)).toBe(false);
-  });
-
-  it('自動開始がオフなら開始しない', () => {
-    expect(shouldAutoStart({ landscape: true }, { autoStart: false })).toBe(false);
+    expect(shouldAutoStart({ landscape: false })).toBe(false);
   });
 });
 

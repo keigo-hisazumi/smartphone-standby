@@ -85,9 +85,10 @@ describe('sortWidgets', () => {
     expect('worldCities' in s).toBe(false);
   });
 
-  it('廃止した充電状態の設定は保存データから取り除く', () => {
-    const s = mergeSettings({ layoutVersion: 6, requireCharging: true });
+  it('廃止した充電状態・自動開始の設定は保存データから取り除く', () => {
+    const s = mergeSettings({ layoutVersion: 6, requireCharging: true, autoStart: false });
     expect('requireCharging' in s).toBe(false);
+    expect('autoStart' in s).toBe(false);
   });
 });
 

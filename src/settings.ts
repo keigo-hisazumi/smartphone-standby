@@ -12,8 +12,6 @@ export function sortWidgets(ids: readonly string[]): WidgetId[] {
 export type NightMode = 'auto' | 'on' | 'off';
 
 export interface Settings {
-  /** 横向きになったら自動でスタンバイを開始する */
-  autoStart: boolean;
   /** Screen Wake Lock で画面を点灯したままにする（常時表示） */
   keepAwake: boolean;
   /** 操作がない時に画面を消す秒数。0 なら消さない */
@@ -40,7 +38,6 @@ export interface Settings {
 }
 
 export const DEFAULT_SETTINGS: Settings = {
-  autoStart: true,
   keepAwake: true,
   sleepAfterSec: 0,
   sleepOnlyAtNight: false,

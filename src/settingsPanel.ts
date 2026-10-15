@@ -17,9 +17,6 @@ export function openSettingsPanel(store: SettingsStore, onClose?: () => void): v
   nightTimes.hidden = s.nightMode !== 'auto';
 
   sheet.body.append(
-    section('開始条件', [
-      toggleRow('自動で開始', s.autoStart, (v) => set({ autoStart: v }), '横向きにするとスタンバイを開始します'),
-    ]),
     section('ディスプレイ', [
       toggleRow('常に画面をオン', s.keepAwake, (v) => set({ keepAwake: v }), 'Screen Wake Lock で自動ロックを防ぎます'),
       selectRow(
