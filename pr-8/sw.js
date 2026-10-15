@@ -2,7 +2,7 @@
 // ビルド時に vite.config.ts のプラグインが下の BUILD を書き換え、
 // 成果物のバージョン（内容のハッシュ）とプリキャッシュするファイル一覧を埋め込む。
 // ページ遷移はネットワーク優先（オフライン時はキャッシュ）、同一オリジンの静的ファイルはキャッシュ優先にする。
-const BUILD = {"version":"c55430d6b885","assets":["./assets/index-Bqor8ypu.css","./assets/index-DUlWgH-C.js","./icon-180.png","./icon-192.png","./icon-512.png","./icon-maskable-512.png","./icon.svg","./","./manifest.webmanifest"]};
+const BUILD = {"version":"f8867609847d","assets":["./assets/index-BOvrCP3W.css","./assets/index-BlIyEjvc.js","./icon-180.png","./icon-192.png","./icon-512.png","./icon-maskable-512.png","./icon.svg","./","./manifest.webmanifest"]};
 const CACHE_PREFIX = 'standby-';
 const CACHE = `${CACHE_PREFIX}${BUILD.version}`;
 
