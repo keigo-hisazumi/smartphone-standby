@@ -1,6 +1,7 @@
 // スタンバイのウィジェット（スマートスタックに並べる部品）
 
 import { createAnalogClock } from '../analogClock';
+import { isJapaneseHoliday } from '../holidays';
 import { h, setText, type Component } from '../dom';
 import type { DeviceMonitor } from '../device';
 import type { Settings, WidgetId } from '../settings';
@@ -47,9 +48,10 @@ function digitalClockWidget(ctx: WidgetContext): Component {
 
 /**
  * カレンダー（月表示）: 今月から offset か月後の月を表示し、今日を赤丸で強調する
- * （今日が含まれない月では強調しない）
+ * （今日が含まれない月では強調しない）。土曜日は水色、日曜日と祝日は赤色で表示する。
+ * 設定に応じて日曜始まり・月曜始まりを切り替える
  */
-function calendarWidget(offset: number): Component {
+function calendarWidget(ctx: WidgetContext, offset: number): Component {
   const title = h('div', { class: 'wc-title' });
   const grid = h('div', { class: 'wc-grid' });
   const el = card('calendar', [title, grid]);
@@ -57,21 +59,31 @@ function calendarWidget(offset: number): Component {
   return {
     el,
     update(now) {
-      const key = `${now.getFullYear()}-${now.getMonth()}-${now.getDate()}`;
+      const weekStart = ctx.settings().weekStartsOnMonday ? 1 : 0;
+      const key = `${now.getFullYear()}-${now.getMonth()}-${now.getDate()}-${weekStart}`;
       if (key === rendered) return;
       rendered = key;
       const { year, month } = addMonths(now.getFullYear(), now.getMonth(), offset);
       const today = offset === 0 ? now.getDate() : null;
       // 年をまたぐ月は年も表示して今年の月と区別できるようにする
       title.textContent = year === now.getFullYear() ? `${month + 1}月` : `${year}年${month + 1}月`;
+      // 列番号 col の曜日（0: 日曜 〜 6: 土曜）
+      const weekdayOf = (col: number) => (col + weekStart) % 7;
+      const weekdayClass = (wd: number) => (wd === 0 ? ' wc-sun' : wd === 6 ? ' wc-sat' : '');
       grid.replaceChildren(
-        ...WEEKDAYS_JA.map((w, i) => h('span', { class: `wc-head${i === 0 ? ' wc-sun' : ''}`, text: w })),
+        ...WEEKDAYS_JA.map((_, col) => {
+          const wd = weekdayOf(col);
+          return h('span', { class: `wc-head${weekdayClass(wd)}`, text: WEEKDAYS_JA[wd] });
+        }),
       );
-      for (const week of monthMatrix(year, month)) {
-        week.forEach((d, i) => {
+      for (const week of monthMatrix(year, month, weekStart)) {
+        week.forEach((d, col) => {
+          const wd = weekdayOf(col);
           const cls = ['wc-day'];
           if (d !== null && d === today) cls.push('wc-today');
-          if (i === 0) cls.push('wc-sun');
+          if (wd === 0) cls.push('wc-sun');
+          else if (d !== null && isJapaneseHoliday(year, month, d)) cls.push('wc-holiday');
+          else if (wd === 6) cls.push('wc-sat');
           grid.append(h('span', { class: cls.join(' '), text: d === null ? '' : String(d) }));
         });
       }
@@ -136,8 +148,8 @@ function weatherWidget(ctx: WidgetContext): Component {
 export const WIDGETS: Record<WidgetId, WidgetDefinition> = {
   'analog-clock': { id: 'analog-clock', name: '時計（アナログ）', create: analogClockWidget },
   'digital-clock': { id: 'digital-clock', name: '時計（デジタル）', create: digitalClockWidget },
-  calendar: { id: 'calendar', name: 'カレンダー（今月）', create: () => calendarWidget(0) },
-  'calendar-next': { id: 'calendar-next', name: 'カレンダー（来月）', create: () => calendarWidget(1) },
+  calendar: { id: 'calendar', name: 'カレンダー（今月）', create: (ctx) => calendarWidget(ctx, 0) },
+  'calendar-next': { id: 'calendar-next', name: 'カレンダー（来月）', create: (ctx) => calendarWidget(ctx, 1) },
   date: { id: 'date', name: '日付', create: dateWidget },
   weather: { id: 'weather', name: '天気', create: weatherWidget },
 };

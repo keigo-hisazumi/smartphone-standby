@@ -42,11 +42,11 @@ export function formatDateShort(d: Date): string {
 }
 
 /**
- * カレンダー表示用の月の行列を返す（日曜始まり）。
+ * カレンダー表示用の月の行列を返す。weekStart は週の始まりの曜日（0: 日曜、1: 月曜）。
  * 当月以外のマスは null。
  */
-export function monthMatrix(year: number, month: number): (number | null)[][] {
-  const firstDay = new Date(year, month, 1).getDay();
+export function monthMatrix(year: number, month: number, weekStart = 0): (number | null)[][] {
+  const firstDay = (new Date(year, month, 1).getDay() - weekStart + 7) % 7;
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const cells: (number | null)[] = [];
   for (let i = 0; i < firstDay; i++) cells.push(null);

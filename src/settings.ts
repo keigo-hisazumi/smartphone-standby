@@ -27,6 +27,8 @@ export interface Settings {
   /** 焼き付き防止のため表示位置を少しずつずらす */
   burnInProtection: boolean;
   hour12: boolean;
+  /** カレンダーを月曜始まりにする（オフなら日曜始まり） */
+  weekStartsOnMonday: boolean;
   /** スマートスタックを一定時間ごとに自動で切り替える */
   smartRotate: boolean;
   /** 天気ウィジェットで位置情報と Open-Meteo を使う */
@@ -47,6 +49,7 @@ export const DEFAULT_SETTINGS: Settings = {
   motionToWake: true,
   burnInProtection: true,
   hour12: false,
+  weekStartsOnMonday: false,
   smartRotate: true,
   weatherEnabled: true,
   layoutVersion: 6,
