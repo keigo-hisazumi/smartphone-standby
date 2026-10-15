@@ -390,7 +390,6 @@ input {
 }
 
 .widget-weather {
-  background: linear-gradient(180deg, #2d6bd2, #5ca4ec);
   justify-content: space-between;
 }
 
