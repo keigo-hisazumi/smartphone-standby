@@ -323,7 +323,7 @@ input {
 }
 
 .wc-title {
-  color: var(--red);
+  color: var(--text);
   font-weight: 700;
   font-size: 1.16em;
   margin-bottom: 0.4em;
