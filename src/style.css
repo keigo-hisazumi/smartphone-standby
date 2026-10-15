@@ -73,26 +73,6 @@ input {
   font-weight: 600;
 }
 
-.chips {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 8px;
-}
-
-.chip {
-  padding: 6px 12px;
-  border-radius: 999px;
-  background: var(--card);
-  color: var(--muted);
-  font-size: 14px;
-}
-
-.chip-on {
-  background: rgba(48, 209, 88, 0.18);
-  color: #30d158;
-}
-
 .launcher-hint,
 .launcher-tips {
   max-width: 34em;
@@ -152,24 +132,15 @@ input {
   line-height: 1.6;
 }
 
-.primary-button,
 .secondary-button {
   border: 0;
   border-radius: 14px;
   padding: 14px 28px;
   font-size: 17px;
   font-weight: 600;
-  cursor: pointer;
-}
-
-.primary-button {
-  background: #0a84ff;
-  color: #fff;
-}
-
-.secondary-button {
   background: var(--card);
   color: var(--text);
+  cursor: pointer;
 }
 
 /* ===== スタンバイ本体 ===== */
@@ -253,28 +224,6 @@ input {
 .sleep-overlay.on {
   opacity: 1;
   pointer-events: auto;
-}
-
-.rotate-hint {
-  position: absolute;
-  inset: 0;
-  z-index: 4;
-  display: none;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  background: #000;
-  color: var(--muted);
-  font-size: 18px;
-}
-
-.rotate-hint.on {
-  display: flex;
-}
-
-.rotate-hint-icon {
-  font-size: 48px;
 }
 
 /* ナイトモード: 全体をモノクロにしてから赤を乗算し、赤一色の表示にする */

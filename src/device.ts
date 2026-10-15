@@ -1,54 +1,30 @@
-// 端末の状態（充電・向き・照度・動き）の取得と、画面点灯・全画面などのブラウザ API のラッパー
+// 端末の状態（向き・照度・動き）の取得と、画面点灯・全画面などのブラウザ API のラッパー
 
 import type { DeviceState } from './rules';
-
-interface BatteryManager extends EventTarget {
-  charging: boolean;
-}
 
 interface WakeLockSentinelLike extends EventTarget {
   release(): Promise<void>;
   released: boolean;
 }
 
-export interface BatteryInfo {
-  supported: boolean;
-  charging: boolean;
-}
-
 type Listener<T> = (value: T) => void;
 
-/** 充電状態と画面の向きを監視する */
+/** 画面の向きを監視する */
 export class DeviceMonitor {
-  battery: BatteryInfo = { supported: false, charging: false };
   landscape = false;
   private listeners = new Set<Listener<DeviceMonitor>>();
   private mql = window.matchMedia('(orientation: landscape)');
 
-  async init(): Promise<void> {
+  init(): void {
     this.landscape = this.mql.matches;
     this.mql.addEventListener('change', () => {
       this.landscape = this.mql.matches;
       this.emit();
     });
-    const nav = navigator as Navigator & { getBattery?: () => Promise<BatteryManager> };
-    if (typeof nav.getBattery === 'function') {
-      try {
-        const bm = await nav.getBattery();
-        const read = () => {
-          this.battery = { supported: true, charging: bm.charging };
-          this.emit();
-        };
-        bm.addEventListener('chargingchange', read);
-        read();
-      } catch {
-        // 取得に失敗した場合は未対応として扱う
-      }
-    }
   }
 
   state(): DeviceState {
-    return { batterySupported: this.battery.supported, charging: this.battery.charging, landscape: this.landscape };
+    return { landscape: this.landscape };
   }
 
   subscribe(listener: Listener<DeviceMonitor>): () => void {

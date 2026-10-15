@@ -4,36 +4,17 @@ import { parseHm } from './time';
 import type { Settings } from './settings';
 
 export interface DeviceState {
-  /** Battery Status API が使えるか */
-  batterySupported: boolean;
-  charging: boolean;
   landscape: boolean;
 }
 
-/**
- * iOS と同じく「充電中」かつ「横向き」でスタンバイに入るかを判定する。
- * 充電状態を取得できない端末（iOS Safari など）では横向きだけを条件にする。
- */
-export function shouldAutoStart(device: DeviceState, settings: Pick<Settings, 'autoStart' | 'requireCharging'>): boolean {
-  if (!settings.autoStart) return false;
-  if (!device.landscape) return false;
-  if (settings.requireCharging && device.batterySupported && !device.charging) return false;
-  return true;
+/** 横向きになったらスタンバイに入るかを判定する（充電状態は監視せず、常に自動で開始する） */
+export function shouldAutoStart(device: DeviceState): boolean {
+  return device.landscape;
 }
 
-/**
- * 表示中のスタンバイを終了すべきか。
- * iOS は縦向きにする・充電をやめるとスタンバイを抜ける。
- * 充電状態での終了は、充電を条件に開始した場合だけ行う（手動開始なら充電なしでも続ける）。
- */
-export function shouldAutoExit(
-  prev: DeviceState,
-  next: DeviceState,
-  settings: Pick<Settings, 'requireCharging'>,
-): boolean {
-  if (prev.landscape && !next.landscape) return true;
-  if (settings.requireCharging && next.batterySupported && prev.charging && !next.charging) return true;
-  return false;
+/** 表示中のスタンバイを終了すべきか。iOS と同じく縦向きにするとスタンバイを抜ける */
+export function shouldAutoExit(prev: DeviceState, next: DeviceState): boolean {
+  return prev.landscape && !next.landscape;
 }
 
 /** 指定時刻がナイトモードの時間帯か（日をまたぐ設定にも対応） */

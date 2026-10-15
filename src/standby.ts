@@ -1,6 +1,14 @@
 // スタンバイ画面本体: ウィジェット画面の表示、ナイトモード、自動スリープ、焼き付き防止を管理する
 
-import { AmbientLight, DeviceMonitor, enterFullscreen, exitFullscreen, WakeLockController, watchMotion } from './device';
+import {
+  AmbientLight,
+  DeviceMonitor,
+  enterFullscreen,
+  exitFullscreen,
+  requestMotionPermission,
+  WakeLockController,
+  watchMotion,
+} from './device';
 import { h } from './dom';
 import { attachGestures } from './gestures';
 import { burnInOffset, isNightActive, sleepEnabled } from './rules';
@@ -23,7 +31,6 @@ export class Standby {
   private content: HTMLElement;
   private view: StandbyView;
   private sleepOverlay: HTMLElement;
-  private rotateHint: HTMLElement;
   private wakeLock = new WakeLockController();
   private ambient = new AmbientLight();
   private lastActivity = Date.now();
@@ -37,20 +44,14 @@ export class Standby {
     this.view = createWidgetsView({ settings: () => store.get(), device, weather }, store, actions);
     this.content = h('div', { class: 'standby-content' }, [this.view.el]);
     this.sleepOverlay = h('div', { class: 'sleep-overlay' });
-    this.rotateHint = h('div', { class: 'rotate-hint' }, [
-      h('div', { class: 'rotate-hint-icon', text: '📱↻' }),
-      h('div', { text: '横向きにしてください' }),
-    ]);
-    this.el = h('div', { class: 'standby', attrs: { 'aria-hidden': 'true' } }, [
-      this.content,
-      this.rotateHint,
-      this.sleepOverlay,
-    ]);
+    this.el = h('div', { class: 'standby', attrs: { 'aria-hidden': 'true' } }, [this.content, this.sleepOverlay]);
 
     attachGestures(this.content, {
       onActivity: () => this.activity(),
-      // 自動開始時は全画面にできないので、最初のタップで全画面にする
+      // 自動開始時は全画面にできないので、最初のタップで全画面にする。
+      // iOS Safari のモーションの許可もユーザー操作中にしか求められないため、ここで求める
       onTap: () => {
+        if (store.get().motionToWake) void requestMotionPermission();
         if (!document.fullscreenElement) void enterFullscreen();
       },
       onLongPress: () => this.view.onLongPress(),
@@ -73,9 +74,8 @@ export class Standby {
     });
   }
 
-  /** スタンバイを開始する。fromGesture はユーザー操作から呼ばれたか（全画面化に必要） */
-  enter(fromGesture: boolean): void {
-    if (fromGesture) void enterFullscreen();
+  /** スタンバイを開始する */
+  enter(): void {
     if (this.active) return;
     this.active = true;
     this.el.classList.add('active');
@@ -116,7 +116,6 @@ export class Standby {
     const offset = s.burnInProtection ? burnInOffset(now) : { x: 0, y: 0 };
     this.el.style.setProperty('--shift-x', `${offset.x}px`);
     this.el.style.setProperty('--shift-y', `${offset.y}px`);
-    this.rotateHint.classList.toggle('on', !this.opts.device.landscape);
   }
 
   private userExit(): void {

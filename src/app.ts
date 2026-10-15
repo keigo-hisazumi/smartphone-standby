@@ -1,6 +1,6 @@
 // アプリ全体: 起動画面、端末状態の監視による自動開始・終了、毎秒の更新ループ
 
-import { DeviceMonitor, requestMotionPermission } from './device';
+import { DeviceMonitor } from './device';
 import { h, setText } from './dom';
 import { shouldAutoExit, shouldAutoStart, type DeviceState } from './rules';
 import { SettingsStore } from './settings';
@@ -17,10 +17,7 @@ export class App {
   private status = {
     time: h('div', { class: 'launcher-time' }),
     date: h('div', { class: 'launcher-date' }),
-    charging: h('span', { class: 'chip' }),
-    orientation: h('span', { class: 'chip' }),
-    auto: h('span', { class: 'chip' }),
-    hint: h('p', { class: 'launcher-hint' }),
+    hint: h('p', { class: 'launcher-hint', text: '横向きに置くと、自動でスタンバイが始まります。' }),
   };
   private pwaBox = h('div', { class: 'pwa-box' });
   private prevState: DeviceState | null = null;
@@ -37,14 +34,7 @@ export class App {
       openSettings: () => this.openSettings(),
       onExit: () => {
         this.suppressAuto = true;
-        this.renderLauncher();
       },
-    });
-    const startButton = h('button', { class: 'primary-button', text: 'スタンバイを開始', attrs: { type: 'button' } });
-    startButton.addEventListener('click', async () => {
-      if (this.store.get().motionToWake) await requestMotionPermission();
-      this.suppressAuto = false;
-      this.standby.enter(true);
     });
     const settingsButton = h('button', { class: 'secondary-button', text: '設定', attrs: { type: 'button' } });
     settingsButton.addEventListener('click', () => this.openSettings());
@@ -52,9 +42,8 @@ export class App {
     this.launcher = h('main', { class: 'launcher' }, [
       h('div', { class: 'launcher-clock' }, [this.status.time, this.status.date]),
       h('h1', { class: 'launcher-title', text: 'StandBy' }),
-      h('div', { class: 'chips' }, [this.status.charging, this.status.orientation, this.status.auto]),
       this.status.hint,
-      h('div', { class: 'launcher-actions' }, [startButton, settingsButton]),
+      h('div', { class: 'launcher-actions' }, [settingsButton]),
       this.pwaBox,
       h('p', { class: 'launcher-tips' }, [
         '操作: 左右のスタックを上下スワイプでウィジェットを切り替え、長押しで編集。',
@@ -64,9 +53,8 @@ export class App {
   }
 
   async start(): Promise<void> {
-    await this.device.init();
+    this.device.init();
     this.device.subscribe(() => this.onDeviceChange());
-    this.store.subscribe(() => this.onDeviceChange());
     this.pwa.subscribe(() => this.renderPwa());
     this.onDeviceChange();
     this.renderPwa();
@@ -74,46 +62,20 @@ export class App {
   }
 
   private openSettings(): void {
-    openSettingsPanel(this.store, this.device.battery.supported);
+    openSettingsPanel(this.store);
   }
 
   private onDeviceChange(): void {
     const state = this.device.state();
-    const settings = this.store.get();
     const prev = this.prevState;
     this.prevState = state;
     if (this.standby.active) {
-      if (prev && shouldAutoExit(prev, state, settings)) this.standby.exit();
+      if (prev && shouldAutoExit(prev, state)) this.standby.exit();
     } else if (prev && !prev.landscape && state.landscape) {
       // 横向きにし直したら手動終了の抑止を解除する
       this.suppressAuto = false;
     }
-    if (prev && prev.charging !== state.charging) this.suppressAuto = false;
-    if (!this.standby.active && !this.suppressAuto && shouldAutoStart(state, settings)) this.standby.enter(false);
-    this.renderLauncher();
-  }
-
-  private renderLauncher(): void {
-    const b = this.device.battery;
-    const s = this.store.get();
-    setText(
-      this.status.charging,
-      !b.supported ? '🔌 充電状態: 取得不可' : b.charging ? '⚡ 充電中' : '🔌 未充電',
-    );
-    this.status.charging.classList.toggle('chip-on', b.supported && b.charging);
-    setText(this.status.orientation, this.device.landscape ? '↔ 横向き' : '↕ 縦向き');
-    this.status.orientation.classList.toggle('chip-on', this.device.landscape);
-    setText(this.status.auto, s.autoStart ? '自動開始: オン' : '自動開始: オフ');
-    this.status.auto.classList.toggle('chip-on', s.autoStart);
-    const needCharging = s.requireCharging && b.supported;
-    setText(
-      this.status.hint,
-      s.autoStart
-        ? needCharging
-          ? '充電しながら横向きに置くと、自動でスタンバイが始まります。'
-          : '横向きに置くと、自動でスタンバイが始まります。'
-        : '「スタンバイを開始」をタップすると表示します。',
-    );
+    if (!this.standby.active && !this.suppressAuto && shouldAutoStart(state)) this.standby.enter();
   }
 
   /** 更新のお知らせと、ホーム画面への追加の案内を描画する */
