@@ -36,13 +36,13 @@ describe('mergeSettings', () => {
   it('左右で順番が異なる保存データは、選択を維持したまま同じ順番に揃える', () => {
     const s = mergeSettings({
       layoutVersion: 3,
-      leftStack: ['calendar', 'date', 'weather', 'analog-clock', 'digital-clock', 'world-clock', 'battery'],
-      rightStack: ['analog-clock', 'world-clock', 'digital-clock', 'battery', 'calendar', 'date', 'weather'],
+      leftStack: ['calendar', 'date', 'weather', 'analog-clock', 'digital-clock', 'world-clock'],
+      rightStack: ['analog-clock', 'world-clock', 'digital-clock', 'calendar', 'date', 'weather'],
     });
     expect(s.leftStack).toEqual(WIDGET_ORDER);
     expect(s.rightStack).toEqual(WIDGET_ORDER);
-    const partial = mergeSettings({ layoutVersion: 5, leftStack: ['battery', 'calendar'], rightStack: ['weather', 'date'] });
-    expect(partial.leftStack).toEqual(['calendar', 'battery']);
+    const partial = mergeSettings({ layoutVersion: 5, leftStack: ['world-clock', 'calendar'], rightStack: ['weather', 'date'] });
+    expect(partial.leftStack).toEqual(['calendar', 'world-clock']);
     expect(partial.rightStack).toEqual(['date', 'weather']);
   });
 
@@ -62,7 +62,13 @@ describe('mergeSettings', () => {
 
 describe('sortWidgets', () => {
   it('WIDGET_ORDER の順に並べ、重複と未知の ID を除く', () => {
-    expect(sortWidgets(['battery', 'calendar', 'battery', 'unknown'])).toEqual(['calendar', 'battery']);
+    expect(sortWidgets(['world-clock', 'calendar', 'world-clock', 'unknown'])).toEqual(['calendar', 'world-clock']);
+  });
+
+  it('廃止したバッテリーウィジェットは保存データから取り除く', () => {
+    const s = mergeSettings({ layoutVersion: 5, leftStack: ['battery', 'date'], rightStack: ['battery'] });
+    expect(s.leftStack).toEqual(['date']);
+    expect(s.rightStack).toEqual(WIDGET_ORDER);
   });
 });
 

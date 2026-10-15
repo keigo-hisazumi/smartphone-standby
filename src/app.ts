@@ -98,7 +98,7 @@ export class App {
     const s = this.store.get();
     setText(
       this.status.charging,
-      !b.supported ? '🔌 充電状態: 取得不可' : b.charging ? `⚡ 充電中 ${Math.round((b.level ?? 0) * 100)}%` : `🔋 未充電 ${Math.round((b.level ?? 0) * 100)}%`,
+      !b.supported ? '🔌 充電状態: 取得不可' : b.charging ? '⚡ 充電中' : '🔌 未充電',
     );
     this.status.charging.classList.toggle('chip-on', b.supported && b.charging);
     setText(this.status.orientation, this.device.landscape ? '↔ 横向き' : '↕ 縦向き');

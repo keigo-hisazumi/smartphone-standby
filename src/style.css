@@ -481,54 +481,6 @@ input {
   font-variant-numeric: tabular-nums;
 }
 
-.widget-battery {
-  align-items: center;
-  justify-content: center;
-  gap: calc(var(--u) * 1);
-}
-
-.wb-ring-wrap {
-  position: relative;
-  width: 55%;
-  aspect-ratio: 1;
-}
-
-.wb-ring {
-  width: 100%;
-  height: 100%;
-}
-
-.wb-track {
-  fill: none;
-  stroke: rgba(48, 209, 88, 0.2);
-  stroke-width: 9;
-}
-
-.wb-bar {
-  fill: none;
-  stroke: #30d158;
-  stroke-width: 9;
-  stroke-linecap: round;
-  transition: stroke-dashoffset 1s ease;
-}
-
-.wb-bar.wb-low {
-  stroke: var(--red);
-}
-
-.wb-icon {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  font-size: calc(var(--u) * 8);
-}
-
-.wb-pct {
-  font-size: calc(var(--u) * 7);
-  font-weight: 700;
-}
-
 .wb-label {
   color: var(--muted);
   font-size: calc(var(--u) * 2.8);

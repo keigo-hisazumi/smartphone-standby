@@ -1,8 +1,8 @@
 // 設定の定義と永続化（localStorage）
 
-export type WidgetId = 'analog-clock' | 'digital-clock' | 'calendar' | 'date' | 'world-clock' | 'battery' | 'weather';
+export type WidgetId = 'analog-clock' | 'digital-clock' | 'calendar' | 'date' | 'world-clock' | 'weather';
 /** スタックに並べるウィジェットの順番。左右のスタックで共通 */
-export const WIDGET_ORDER: WidgetId[] = ['calendar', 'date', 'weather', 'analog-clock', 'digital-clock', 'world-clock', 'battery'];
+export const WIDGET_ORDER: WidgetId[] = ['calendar', 'date', 'weather', 'analog-clock', 'digital-clock', 'world-clock'];
 
 /** ids を WIDGET_ORDER の順に並べ替える（重複・未知の ID は除く） */
 export function sortWidgets(ids: readonly string[]): WidgetId[] {

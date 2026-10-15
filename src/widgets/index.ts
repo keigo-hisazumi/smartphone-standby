@@ -132,40 +132,6 @@ function worldClockWidget(ctx: WidgetContext): Component {
   };
 }
 
-/** バッテリー: 残量リングと充電中アイコン */
-function batteryWidget(ctx: WidgetContext): Component {
-  const R = 40;
-  const C = 2 * Math.PI * R;
-  const ring = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-  ring.setAttribute('viewBox', '0 0 100 100');
-  ring.setAttribute('class', 'wb-ring');
-  ring.innerHTML = `<circle cx="50" cy="50" r="${R}" class="wb-track"/><circle cx="50" cy="50" r="${R}" class="wb-bar" stroke-dasharray="${C}" stroke-dashoffset="${C}" transform="rotate(-90 50 50)"/>`;
-  const bar = ring.querySelector('.wb-bar') as SVGCircleElement;
-  const icon = h('div', { class: 'wb-icon' });
-  const pct = h('div', { class: 'wb-pct' });
-  const label = h('div', { class: 'wb-label' });
-  const el = card('battery', [h('div', { class: 'wb-ring-wrap' }, [ring, icon]), pct, label]);
-  return {
-    el,
-    update() {
-      const b = ctx.device.battery;
-      if (!b.supported || b.level === null) {
-        setText(pct, '--');
-        setText(label, 'この端末では取得できません');
-        setText(icon, '📱');
-        bar.setAttribute('stroke-dashoffset', String(C));
-        return;
-      }
-      const level = Math.round(b.level * 100);
-      setText(pct, `${level}%`);
-      setText(label, b.charging ? '充電中' : 'バッテリー');
-      setText(icon, b.charging ? '⚡' : '📱');
-      bar.setAttribute('stroke-dashoffset', String(C * (1 - b.level)));
-      bar.classList.toggle('wb-low', level <= 20 && !b.charging);
-    },
-  };
-}
-
 /** 天気: 位置情報 + Open-Meteo（設定で有効にした場合のみ通信する） */
 function weatherWidget(ctx: WidgetContext): Component {
   const place = h('div', { class: 'ww2-place', text: '現在地' });
@@ -210,6 +176,5 @@ export const WIDGETS: Record<WidgetId, WidgetDefinition> = {
   calendar: { id: 'calendar', name: 'カレンダー（月）', create: calendarWidget },
   date: { id: 'date', name: '日付', create: dateWidget },
   'world-clock': { id: 'world-clock', name: '世界時計', create: worldClockWidget },
-  battery: { id: 'battery', name: 'バッテリー', create: batteryWidget },
   weather: { id: 'weather', name: '天気', create: weatherWidget },
 };

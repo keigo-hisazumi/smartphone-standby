@@ -4,7 +4,6 @@ import type { DeviceState } from './rules';
 
 interface BatteryManager extends EventTarget {
   charging: boolean;
-  level: number;
 }
 
 interface WakeLockSentinelLike extends EventTarget {
@@ -15,15 +14,13 @@ interface WakeLockSentinelLike extends EventTarget {
 export interface BatteryInfo {
   supported: boolean;
   charging: boolean;
-  /** 0〜1。取得できない場合は null */
-  level: number | null;
 }
 
 type Listener<T> = (value: T) => void;
 
 /** 充電状態と画面の向きを監視する */
 export class DeviceMonitor {
-  battery: BatteryInfo = { supported: false, charging: false, level: null };
+  battery: BatteryInfo = { supported: false, charging: false };
   landscape = false;
   private listeners = new Set<Listener<DeviceMonitor>>();
   private mql = window.matchMedia('(orientation: landscape)');
@@ -39,11 +36,10 @@ export class DeviceMonitor {
       try {
         const bm = await nav.getBattery();
         const read = () => {
-          this.battery = { supported: true, charging: bm.charging, level: bm.level };
+          this.battery = { supported: true, charging: bm.charging };
           this.emit();
         };
         bm.addEventListener('chargingchange', read);
-        bm.addEventListener('levelchange', read);
         read();
       } catch {
         // 取得に失敗した場合は未対応として扱う
