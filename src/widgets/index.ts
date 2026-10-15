@@ -3,9 +3,8 @@
 import { createAnalogClock } from '../analogClock';
 import { h, setText, type Component } from '../dom';
 import type { DeviceMonitor } from '../device';
-import { cityName } from '../location';
 import type { Settings, WidgetId } from '../settings';
-import { describeZoneDiff, formatDateLong, formatTime, formatTimeParts, monthMatrix, WEEKDAYS_JA, zonedParts } from '../time';
+import { formatDateLong, formatTime, monthMatrix, WEEKDAYS_JA } from '../time';
 import { WeatherService, weatherLabel } from '../weather';
 
 export interface WidgetContext {
@@ -90,48 +89,6 @@ function dateWidget(): Component {
   };
 }
 
-/** 世界時計: 登録した都市の時刻と時差 */
-function worldClockWidget(ctx: WidgetContext): Component {
-  const list = h('div', { class: 'ww-list' });
-  const el = card('world-clock', [list]);
-  let rows: { tz: string; time: HTMLElement; period: HTMLElement; diff: HTMLElement }[] = [];
-  let citiesKey = '';
-  return {
-    el,
-    update(now) {
-      const cities = ctx.settings().worldCities;
-      if (cities.join() !== citiesKey) {
-        citiesKey = cities.join();
-        rows = cities.map((tz) => ({
-          tz,
-          time: h('span', { class: 'ww-time' }),
-          period: h('span', { class: 'ww-period' }),
-          diff: h('div', { class: 'ww-diff' }),
-        }));
-        list.replaceChildren(
-          ...rows.map((r) =>
-            h('div', { class: 'ww-row' }, [
-              h('div', { class: 'ww-left' }, [h('div', { class: 'ww-city', text: cityName(r.tz) }), r.diff]),
-              h('div', { class: 'ww-right' }, [r.period, r.time]),
-            ]),
-          ),
-        );
-      }
-      for (const r of rows) {
-        try {
-          const p = zonedParts(now, r.tz);
-          const t = formatTimeParts(p.hour, p.minute, p.second, ctx.settings().hour12);
-          setText(r.time, `${t.hours}:${t.minutes}`);
-          setText(r.period, t.period);
-          setText(r.diff, describeZoneDiff(now, r.tz));
-        } catch {
-          setText(r.time, '--:--');
-        }
-      }
-    },
-  };
-}
-
 /** 天気: 位置情報 + Open-Meteo（設定で有効にした場合のみ通信する） */
 function weatherWidget(ctx: WidgetContext): Component {
   const place = h('div', { class: 'ww2-place', text: '現在地' });
@@ -175,6 +132,5 @@ export const WIDGETS: Record<WidgetId, WidgetDefinition> = {
   'digital-clock': { id: 'digital-clock', name: '時計（デジタル）', create: digitalClockWidget },
   calendar: { id: 'calendar', name: 'カレンダー（月）', create: calendarWidget },
   date: { id: 'date', name: '日付', create: dateWidget },
-  'world-clock': { id: 'world-clock', name: '世界時計', create: worldClockWidget },
   weather: { id: 'weather', name: '天気', create: weatherWidget },
 };
