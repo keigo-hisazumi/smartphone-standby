@@ -1,8 +1,8 @@
 // 設定の定義と永続化（localStorage）
 
-export type WidgetId = 'analog-clock' | 'digital-clock' | 'calendar' | 'date' | 'world-clock' | 'battery' | 'weather';
+export type WidgetId = 'analog-clock' | 'digital-clock' | 'calendar' | 'date' | 'weather';
 /** スタックに並べるウィジェットの順番。左右のスタックで共通 */
-export const WIDGET_ORDER: WidgetId[] = ['calendar', 'date', 'weather', 'analog-clock', 'digital-clock', 'world-clock', 'battery'];
+export const WIDGET_ORDER: WidgetId[] = ['calendar', 'date', 'weather', 'analog-clock', 'digital-clock'];
 
 /** ids を WIDGET_ORDER の順に並べ替える（重複・未知の ID は除く） */
 export function sortWidgets(ids: readonly string[]): WidgetId[] {
@@ -39,7 +39,6 @@ export interface Settings {
   layoutVersion: number;
   leftStack: WidgetId[];
   rightStack: WidgetId[];
-  worldCities: string[];
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -60,7 +59,6 @@ export const DEFAULT_SETTINGS: Settings = {
   // 左右のスタックにはすべてのウィジェットを同じ順番で表示できる。既定では両方に全ウィジェットを入れる
   leftStack: [...WIDGET_ORDER],
   rightStack: [...WIDGET_ORDER],
-  worldCities: ['America/New_York', 'Europe/London', 'Asia/Tokyo'],
 };
 
 const STORAGE_KEY = 'smartphone-standby:settings';

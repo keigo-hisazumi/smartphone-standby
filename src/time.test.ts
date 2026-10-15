@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { describeZoneDiff, formatDateLong, formatTimeParts, handAngles, monthMatrix, parseHm, zonedParts, zoneOffsetMinutes } from './time';
+import { formatDateLong, formatTimeParts, handAngles, monthMatrix, parseHm } from './time';
 
 describe('formatTimeParts', () => {
   it('24 時間表示では時をそのまま表示する', () => {
@@ -52,26 +52,5 @@ describe('parseHm', () => {
     expect(parseHm('6:05')).toBe(365);
     expect(parseHm('24:00')).toBeNull();
     expect(parseHm('abc')).toBeNull();
-  });
-});
-
-describe('タイムゾーン', () => {
-  const date = new Date(Date.UTC(2026, 0, 15, 20, 30, 0));
-
-  it('指定タイムゾーンの時刻を返す', () => {
-    expect(zonedParts(date, 'Asia/Tokyo')).toMatchObject({ day: 16, hour: 5, minute: 30 });
-    expect(zonedParts(date, 'America/New_York')).toMatchObject({ day: 15, hour: 15 });
-  });
-
-  it('UTC からのオフセット（分）を返す', () => {
-    expect(zoneOffsetMinutes(date, 'Asia/Tokyo')).toBe(540);
-    expect(zoneOffsetMinutes(date, 'Asia/Kolkata')).toBe(330);
-    expect(zoneOffsetMinutes(date, 'America/New_York')).toBe(-300);
-  });
-
-  it('時差の表示は端末のタイムゾーン基準', () => {
-    // 端末のタイムゾーンと同じなら「今日 +0時間」
-    const local = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    expect(describeZoneDiff(date, local)).toBe('今日 +0時間');
   });
 });
