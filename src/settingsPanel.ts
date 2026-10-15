@@ -59,6 +59,7 @@ export function openSettingsPanel(store: SettingsStore, onClose?: () => void): v
     ]),
     section('表示', [
       toggleRow('12 時間表示', s.hour12, (v) => set({ hour12: v })),
+      toggleRow('カレンダーを月曜始まりにする', s.weekStartsOnMonday, (v) => set({ weekStartsOnMonday: v })),
       toggleRow(
         'ウィジェットを自動で切り替え',
         s.smartRotate,

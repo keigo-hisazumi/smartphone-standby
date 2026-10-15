@@ -33,6 +33,17 @@ describe('monthMatrix', () => {
     expect(m).toHaveLength(4);
     expect(m[0][0]).toBe(1);
   });
+
+  it('月曜始まりでは月曜日を先頭の列にする', () => {
+    const oct = monthMatrix(2026, 9, 1);
+    expect(oct).toHaveLength(5);
+    expect(oct[0]).toEqual([null, null, null, 1, 2, 3, 4]);
+    expect(oct[4]).toEqual([26, 27, 28, 29, 30, 31, null]);
+    // 2026 年 2 月 1 日は日曜日なので、月曜始まりでは最終列になり 5 週になる
+    const feb = monthMatrix(2026, 1, 1);
+    expect(feb).toHaveLength(5);
+    expect(feb[0]).toEqual([null, null, null, null, null, null, 1]);
+  });
 });
 
 describe('addMonths', () => {
