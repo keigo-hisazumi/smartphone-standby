@@ -5,7 +5,7 @@ import { h } from './dom';
 import { openSheet, section, selectRow, timeRow, toggleRow } from './sheet';
 import type { SettingsStore } from './settings';
 
-export function openSettingsPanel(store: SettingsStore, batterySupported: boolean, onClose?: () => void): void {
+export function openSettingsPanel(store: SettingsStore, onClose?: () => void): void {
   const s = store.get();
   const sheet = openSheet('スタンバイ', onClose);
   const set = store.set.bind(store);
@@ -18,15 +18,7 @@ export function openSettingsPanel(store: SettingsStore, batterySupported: boolea
 
   sheet.body.append(
     section('開始条件', [
-      toggleRow('自動で開始', s.autoStart, (v) => set({ autoStart: v }), '充電中に横向きにするとスタンバイを開始します'),
-      toggleRow(
-        '充電中のみ',
-        s.requireCharging,
-        (v) => set({ requireCharging: v }),
-        batterySupported
-          ? '充電をやめると終了します'
-          : 'この端末のブラウザは充電状態を取得できないため、横向きだけで開始します',
-      ),
+      toggleRow('自動で開始', s.autoStart, (v) => set({ autoStart: v }), '横向きにするとスタンバイを開始します'),
     ]),
     section('ディスプレイ', [
       toggleRow('常に画面をオン', s.keepAwake, (v) => set({ keepAwake: v }), 'Screen Wake Lock で自動ロックを防ぎます'),

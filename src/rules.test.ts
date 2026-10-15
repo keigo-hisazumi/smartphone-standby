@@ -4,48 +4,28 @@ import { burnInOffset, isInNightWindow, isNightActive, shouldAutoExit, shouldAut
 const at = (h: number, m = 0) => new Date(2026, 9, 13, h, m);
 
 describe('shouldAutoStart', () => {
-  const settings = { autoStart: true, requireCharging: true };
+  const settings = { autoStart: true };
 
-  it('充電中かつ横向きで開始する', () => {
-    expect(shouldAutoStart({ batterySupported: true, charging: true, landscape: true }, settings)).toBe(true);
+  it('横向きで開始する', () => {
+    expect(shouldAutoStart({ landscape: true }, settings)).toBe(true);
   });
 
-  it('縦向き・未充電では開始しない', () => {
-    expect(shouldAutoStart({ batterySupported: true, charging: true, landscape: false }, settings)).toBe(false);
-    expect(shouldAutoStart({ batterySupported: true, charging: false, landscape: true }, settings)).toBe(false);
-  });
-
-  it('充電状態を取得できない端末では横向きだけで開始する', () => {
-    expect(shouldAutoStart({ batterySupported: false, charging: false, landscape: true }, settings)).toBe(true);
-  });
-
-  it('充電条件をオフにすれば未充電でも開始する', () => {
-    expect(
-      shouldAutoStart({ batterySupported: true, charging: false, landscape: true }, { ...settings, requireCharging: false }),
-    ).toBe(true);
+  it('縦向きでは開始しない', () => {
+    expect(shouldAutoStart({ landscape: false }, settings)).toBe(false);
   });
 
   it('自動開始がオフなら開始しない', () => {
-    expect(shouldAutoStart({ batterySupported: true, charging: true, landscape: true }, { ...settings, autoStart: false })).toBe(
-      false,
-    );
+    expect(shouldAutoStart({ landscape: true }, { autoStart: false })).toBe(false);
   });
 });
 
 describe('shouldAutoExit', () => {
-  const on = { batterySupported: true, charging: true, landscape: true };
-
   it('縦向きにすると終了する', () => {
-    expect(shouldAutoExit(on, { ...on, landscape: false }, { requireCharging: true })).toBe(true);
-  });
-
-  it('充電をやめると終了する（充電条件がオンの場合のみ）', () => {
-    expect(shouldAutoExit(on, { ...on, charging: false }, { requireCharging: true })).toBe(true);
-    expect(shouldAutoExit(on, { ...on, charging: false }, { requireCharging: false })).toBe(false);
+    expect(shouldAutoExit({ landscape: true }, { landscape: false })).toBe(true);
   });
 
   it('状態が変わらなければ終了しない', () => {
-    expect(shouldAutoExit(on, on, { requireCharging: true })).toBe(false);
+    expect(shouldAutoExit({ landscape: true }, { landscape: true })).toBe(false);
   });
 });
 

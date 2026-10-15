@@ -84,6 +84,11 @@ describe('sortWidgets', () => {
     expect(s.rightStack).toEqual(WIDGET_ORDER);
     expect('worldCities' in s).toBe(false);
   });
+
+  it('廃止した充電状態の設定は保存データから取り除く', () => {
+    const s = mergeSettings({ layoutVersion: 6, requireCharging: true });
+    expect('requireCharging' in s).toBe(false);
+  });
 });
 
 describe('mergeSettings（既定値の保護）', () => {
