@@ -4,7 +4,7 @@ import { createAnalogClock } from '../analogClock';
 import { h, setText, type Component } from '../dom';
 import type { DeviceMonitor } from '../device';
 import type { Settings, WidgetId } from '../settings';
-import { formatDateLong, formatTime, monthMatrix, WEEKDAYS_JA } from '../time';
+import { addMonths, formatDateLong, formatTime, monthMatrix, WEEKDAYS_JA } from '../time';
 import { WeatherService, weatherLabel } from '../weather';
 
 export interface WidgetContext {
@@ -45,8 +45,11 @@ function digitalClockWidget(ctx: WidgetContext): Component {
   };
 }
 
-/** カレンダー（月表示）: 今日を赤丸で強調 */
-function calendarWidget(): Component {
+/**
+ * カレンダー（月表示）: 今月から offset か月後の月を表示し、今日を赤丸で強調する
+ * （今日が含まれない月では強調しない）
+ */
+function calendarWidget(offset: number): Component {
   const title = h('div', { class: 'wc-title' });
   const grid = h('div', { class: 'wc-grid' });
   const el = card('calendar', [title, grid]);
@@ -57,14 +60,17 @@ function calendarWidget(): Component {
       const key = `${now.getFullYear()}-${now.getMonth()}-${now.getDate()}`;
       if (key === rendered) return;
       rendered = key;
-      title.textContent = `${now.getMonth() + 1}月`;
+      const { year, month } = addMonths(now.getFullYear(), now.getMonth(), offset);
+      const today = offset === 0 ? now.getDate() : null;
+      // 年をまたぐ月は年も表示して今年の月と区別できるようにする
+      title.textContent = year === now.getFullYear() ? `${month + 1}月` : `${year}年${month + 1}月`;
       grid.replaceChildren(
         ...WEEKDAYS_JA.map((w, i) => h('span', { class: `wc-head${i === 0 ? ' wc-sun' : ''}`, text: w })),
       );
-      for (const week of monthMatrix(now.getFullYear(), now.getMonth())) {
+      for (const week of monthMatrix(year, month)) {
         week.forEach((d, i) => {
           const cls = ['wc-day'];
-          if (d === now.getDate()) cls.push('wc-today');
+          if (d !== null && d === today) cls.push('wc-today');
           if (i === 0) cls.push('wc-sun');
           grid.append(h('span', { class: cls.join(' '), text: d === null ? '' : String(d) }));
         });
@@ -130,7 +136,8 @@ function weatherWidget(ctx: WidgetContext): Component {
 export const WIDGETS: Record<WidgetId, WidgetDefinition> = {
   'analog-clock': { id: 'analog-clock', name: '時計（アナログ）', create: analogClockWidget },
   'digital-clock': { id: 'digital-clock', name: '時計（デジタル）', create: digitalClockWidget },
-  calendar: { id: 'calendar', name: 'カレンダー（月）', create: calendarWidget },
+  calendar: { id: 'calendar', name: 'カレンダー（今月）', create: () => calendarWidget(0) },
+  'calendar-next': { id: 'calendar-next', name: 'カレンダー（来月）', create: () => calendarWidget(1) },
   date: { id: 'date', name: '日付', create: dateWidget },
   weather: { id: 'weather', name: '天気', create: weatherWidget },
 };

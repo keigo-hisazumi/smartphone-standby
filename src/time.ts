@@ -57,6 +57,12 @@ export function monthMatrix(year: number, month: number): (number | null)[][] {
   return weeks;
 }
 
+/** year 年 month 月（0 始まり）から n か月後の年と月を返す（年をまたぐ場合も正しく繰り上げる） */
+export function addMonths(year: number, month: number, n: number): { year: number; month: number } {
+  const total = year * 12 + month + n;
+  return { year: Math.floor(total / 12), month: ((total % 12) + 12) % 12 };
+}
+
 export interface HandAngles {
   hour: number;
   minute: number;

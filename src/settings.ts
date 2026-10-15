@@ -1,8 +1,8 @@
 // 設定の定義と永続化（localStorage）
 
-export type WidgetId = 'analog-clock' | 'digital-clock' | 'calendar' | 'date' | 'weather';
+export type WidgetId = 'analog-clock' | 'digital-clock' | 'calendar' | 'calendar-next' | 'date' | 'weather';
 /** スタックに並べるウィジェットの順番。左右のスタックで共通 */
-export const WIDGET_ORDER: WidgetId[] = ['calendar', 'date', 'weather', 'analog-clock', 'digital-clock'];
+export const WIDGET_ORDER: WidgetId[] = ['calendar', 'calendar-next', 'date', 'weather', 'analog-clock', 'digital-clock'];
 
 /** ids を WIDGET_ORDER の順に並べ替える（重複・未知の ID は除く） */
 export function sortWidgets(ids: readonly string[]): WidgetId[] {
@@ -55,7 +55,7 @@ export const DEFAULT_SETTINGS: Settings = {
   hour12: false,
   smartRotate: true,
   weatherEnabled: true,
-  layoutVersion: 5,
+  layoutVersion: 6,
   // 左右のスタックにはすべてのウィジェットを同じ順番で表示できる。既定では両方に全ウィジェットを入れる
   leftStack: [...WIDGET_ORDER],
   rightStack: [...WIDGET_ORDER],
@@ -93,6 +93,11 @@ export function mergeSettings(saved: unknown): Settings {
   // 左右で順番が異なる保存データは WIDGET_ORDER の順に揃える（表示するウィジェットの選択は維持）
   // 天気が既定でオフだった頃（構成バージョン 5 より前）の保存データは、天気をオンにする
   if (version < 5) result.weatherEnabled = true;
+  // 来月のカレンダーがなかった頃（構成バージョン 6 より前）の保存データは、左右のスタックに来月のカレンダーを追加する
+  if (version < 6) {
+    result.leftStack.push('calendar-next');
+    result.rightStack.push('calendar-next');
+  }
   result.leftStack = sortWidgets(result.leftStack);
   result.rightStack = sortWidgets(result.rightStack);
   if (result.leftStack.length === 0) result.leftStack = [...WIDGET_ORDER];

@@ -8,7 +8,7 @@ describe('mergeSettings', () => {
   });
 
   it('保存済みの値で上書きし、型が違う値や未知の項目は捨てる', () => {
-    const s = mergeSettings({ layoutVersion: 5, hour12: true, sleepAfterSec: '60', unknown: 1, leftStack: ['date'] });
+    const s = mergeSettings({ layoutVersion: 6, hour12: true, sleepAfterSec: '60', unknown: 1, leftStack: ['date'] });
     expect(s.hour12).toBe(true);
     expect(s.sleepAfterSec).toBe(DEFAULT_SETTINGS.sleepAfterSec);
     expect(s.leftStack).toEqual(['date']);
@@ -41,7 +41,7 @@ describe('mergeSettings', () => {
     });
     expect(s.leftStack).toEqual(WIDGET_ORDER);
     expect(s.rightStack).toEqual(WIDGET_ORDER);
-    const partial = mergeSettings({ layoutVersion: 5, leftStack: ['digital-clock', 'calendar'], rightStack: ['weather', 'date'] });
+    const partial = mergeSettings({ layoutVersion: 6, leftStack: ['digital-clock', 'calendar'], rightStack: ['weather', 'date'] });
     expect(partial.leftStack).toEqual(['calendar', 'digital-clock']);
     expect(partial.rightStack).toEqual(['date', 'weather']);
   });
@@ -53,8 +53,16 @@ describe('mergeSettings', () => {
     expect(mergeSettings({ layoutVersion: 5, weatherEnabled: false }).weatherEnabled).toBe(false);
   });
 
+  it('来月のカレンダーがなかった頃の保存データは、左右のスタックに来月のカレンダーを追加する', () => {
+    const s = mergeSettings({ layoutVersion: 5, leftStack: ['calendar', 'date'], rightStack: ['weather'] });
+    expect(s.leftStack).toEqual(['calendar', 'calendar-next', 'date']);
+    expect(s.rightStack).toEqual(['calendar-next', 'weather']);
+    // 移行後に外した場合は維持する
+    expect(mergeSettings({ layoutVersion: 6, leftStack: ['calendar'] }).leftStack).toEqual(['calendar']);
+  });
+
   it('未知のウィジェットしかない保存データは既定値に戻す', () => {
-    const s = mergeSettings({ layoutVersion: 5, leftStack: ['photos'], rightStack: [] });
+    const s = mergeSettings({ layoutVersion: 6, leftStack: ['photos'], rightStack: [] });
     expect(s.leftStack).toEqual(WIDGET_ORDER);
     expect(s.rightStack).toEqual(WIDGET_ORDER);
   });
@@ -67,7 +75,7 @@ describe('sortWidgets', () => {
 
   it('廃止したバッテリー・世界時計のウィジェットと都市の設定は保存データから取り除く', () => {
     const s = mergeSettings({
-      layoutVersion: 5,
+      layoutVersion: 6,
       leftStack: ['battery', 'world-clock', 'date'],
       rightStack: ['battery', 'world-clock'],
       worldCities: ['Asia/Tokyo'],
