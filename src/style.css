@@ -415,7 +415,7 @@ input {
 }
 
 .ac-face {
-  fill: #fff;
+  fill: #000;
 }
 
 .ac-tick {
@@ -462,28 +462,6 @@ input {
 
 .ac-cap-inner {
   fill: #000;
-}
-
-/* ウィジェットのアナログ時計は白い文字盤に黒い針 */
-.widget .ac-tick {
-  stroke: rgba(0, 0, 0, 0.3);
-}
-
-.widget .ac-tick-major {
-  stroke: #000;
-}
-
-.widget .ac-num {
-  fill: #000;
-}
-
-.widget .ac-hour,
-.widget .ac-minute {
-  stroke: #000;
-}
-
-.widget .ac-cap-inner {
-  fill: #fff;
 }
 
 /* ===== シート（編集・設定） ===== */
