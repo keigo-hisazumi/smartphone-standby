@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatDateLong, formatTimeParts, handAngles, monthMatrix, parseHm } from './time';
+import { addMonths, formatDateLong, formatTimeParts, handAngles, monthMatrix, parseHm } from './time';
 
 describe('formatTimeParts', () => {
   it('24 時間表示では時をそのまま表示する', () => {
@@ -32,6 +32,14 @@ describe('monthMatrix', () => {
     const m = monthMatrix(2026, 1);
     expect(m).toHaveLength(4);
     expect(m[0][0]).toBe(1);
+  });
+});
+
+describe('addMonths', () => {
+  it('n か月後の年と月を返し、年をまたぐ場合は繰り上げる', () => {
+    expect(addMonths(2026, 9, 1)).toEqual({ year: 2026, month: 10 });
+    expect(addMonths(2026, 11, 1)).toEqual({ year: 2027, month: 0 });
+    expect(addMonths(2026, 0, -1)).toEqual({ year: 2025, month: 11 });
   });
 });
 
