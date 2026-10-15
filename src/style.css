@@ -7,6 +7,7 @@
   --text: #fff;
   --muted: rgba(235, 235, 245, 0.6);
   --red: #ff453a;
+  --sky: #64d2ff;
   --accent: #ff9f0a;
   --font: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Hiragino Sans', 'Noto Sans JP', 'Roboto', system-ui, sans-serif;
   --font-rounded: ui-rounded, 'SF Pro Rounded', 'Hiragino Maru Gothic ProN', 'M PLUS Rounded 1c', 'Nunito', var(--font);
@@ -351,8 +352,14 @@ input {
   border-radius: 50%;
 }
 
-.wc-sun {
-  color: rgba(255, 255, 255, 0.55);
+/* 日曜日と祝日は赤色、土曜日は水色（曜日の見出しにも適用する） */
+.wc-sun,
+.wc-holiday {
+  color: var(--red);
+}
+
+.wc-sat {
+  color: var(--sky);
 }
 
 .wc-today {

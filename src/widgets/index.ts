@@ -1,6 +1,7 @@
 // スタンバイのウィジェット（スマートスタックに並べる部品）
 
 import { createAnalogClock } from '../analogClock';
+import { isJapaneseHoliday } from '../holidays';
 import { h, setText, type Component } from '../dom';
 import type { DeviceMonitor } from '../device';
 import type { Settings, WidgetId } from '../settings';
@@ -47,7 +48,7 @@ function digitalClockWidget(ctx: WidgetContext): Component {
 
 /**
  * カレンダー（月表示）: 今月から offset か月後の月を表示し、今日を赤丸で強調する
- * （今日が含まれない月では強調しない）
+ * （今日が含まれない月では強調しない）。土曜日は水色、日曜日と祝日は赤色で表示する
  */
 function calendarWidget(offset: number): Component {
   const title = h('div', { class: 'wc-title' });
@@ -64,14 +65,15 @@ function calendarWidget(offset: number): Component {
       const today = offset === 0 ? now.getDate() : null;
       // 年をまたぐ月は年も表示して今年の月と区別できるようにする
       title.textContent = year === now.getFullYear() ? `${month + 1}月` : `${year}年${month + 1}月`;
-      grid.replaceChildren(
-        ...WEEKDAYS_JA.map((w, i) => h('span', { class: `wc-head${i === 0 ? ' wc-sun' : ''}`, text: w })),
-      );
+      const weekdayClass = (i: number) => (i === 0 ? ' wc-sun' : i === 6 ? ' wc-sat' : '');
+      grid.replaceChildren(...WEEKDAYS_JA.map((w, i) => h('span', { class: `wc-head${weekdayClass(i)}`, text: w })));
       for (const week of monthMatrix(year, month)) {
         week.forEach((d, i) => {
           const cls = ['wc-day'];
           if (d !== null && d === today) cls.push('wc-today');
           if (i === 0) cls.push('wc-sun');
+          else if (d !== null && isJapaneseHoliday(year, month, d)) cls.push('wc-holiday');
+          else if (i === 6) cls.push('wc-sat');
           grid.append(h('span', { class: cls.join(' '), text: d === null ? '' : String(d) }));
         });
       }

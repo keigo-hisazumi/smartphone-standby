@@ -52,6 +52,7 @@ src/
   views/            ウィジェット画面（左右のスマートスタック）
   widgets/          ウィジェット
   settings.ts       設定と localStorage への保存
+  holidays.ts       日本の祝日の判定（カレンダーで土曜日は水色、日曜日・祝日は赤色に表示）
   pwa.ts            PWA（Service Worker の登録・更新通知、ホーム画面への追加の案内）
 public/             manifest・アイコン・Service Worker（ビルド時にプリキャッシュ一覧を埋め込む）
 docs/standby-spec.md  iOS スタンバイの仕様と再現方針
