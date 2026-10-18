@@ -9,6 +9,9 @@
 #   - ビルドコマンド（npm run build など）
 #   - publish_dir（ビルド出力ディレクトリ）
 #
+# Vite はベースパス用の環境変数を自動では読みません。`vite.config.ts` に
+# `base: process.env.VITE_BASE_PATH ?? '/'` を設定しないと、Pages 上でアセットが 404 になり画面が真っ白になります。
+#
 # package.json が存在しないリポジトリでは detect ジョブの判定によりスキップします。
 
 name: PR Preview
@@ -48,7 +51,12 @@ jobs:
 
   deploy-preview:
     needs: detect
-    if: github.event.action != 'closed' && needs.detect.outputs.has-package-json == 'true'
+    # Dependabot が起動したワークフローは GITHUB_TOKEN が読み取り専用になり、
+    # gh-pages への push やコメント投稿ができないためスキップする
+    if: >-
+      github.event.action != 'closed'
+      && needs.detect.outputs.has-package-json == 'true'
+      && github.actor != 'dependabot[bot]'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

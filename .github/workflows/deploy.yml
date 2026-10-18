@@ -6,6 +6,9 @@
 #   - ビルドコマンド（npm run build など）
 #   - publish_dir（ビルド出力ディレクトリ）
 #
+# Vite はベースパス用の環境変数を自動では読みません。`vite.config.ts` に
+# `base: process.env.VITE_BASE_PATH ?? '/'` を設定しないと、Pages 上でアセットが 404 になり画面が真っ白になります。
+#
 # package.json が存在しないリポジトリでは detect ジョブの判定によりスキップします。
 
 name: Deploy to GitHub Pages
