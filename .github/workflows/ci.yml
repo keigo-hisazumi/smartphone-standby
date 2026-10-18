@@ -8,6 +8,9 @@
 #
 # package.json が存在しない（言語未確定の）リポジトリでは detect ジョブの判定により
 # 後続ジョブをスキップします（`hashFiles` はジョブレベルの `if` では使えないため）。
+#
+# lint / type-check は `--if-present` で実行し、package.json にスクリプトがなければ何もせず成功します。
+# （Vite の雛形には `type-check` がなく、`build` の `tsc -b` が型チェックを兼ねるため）
 
 name: CI
 
@@ -26,10 +29,13 @@ jobs:
   detect:
     name: Detect project
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     outputs:
       has-package-json: ${{ steps.check.outputs.has-package-json }}
     steps:
       - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
       - name: package.json の有無を判定
         id: check
         run: |
@@ -45,8 +51,11 @@ jobs:
     needs: detect
     if: needs.detect.outputs.has-package-json == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
       - name: Node.js のセットアップ
         uses: actions/setup-node@v7
         with:
@@ -55,14 +64,17 @@ jobs:
       - name: 依存関係のインストール
         run: npm ci
       - name: Lint
-        run: npm run lint
+        run: npm run lint --if-present
 
   typecheck:
     name: Type check
     needs: lint
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
       - name: Node.js のセットアップ
         uses: actions/setup-node@v7
         with:
@@ -71,14 +83,17 @@ jobs:
       - name: 依存関係のインストール
         run: npm ci
       - name: 型チェック
-        run: npm run type-check
+        run: npm run type-check --if-present
 
   test:
     name: Test
     needs: lint
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
       - name: Node.js のセットアップ
         uses: actions/setup-node@v7
         with:
@@ -93,8 +108,11 @@ jobs:
     name: Build
     needs: [typecheck, test]
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
       - name: Node.js のセットアップ
         uses: actions/setup-node@v7
         with:
