@@ -1,6 +1,6 @@
 # smartphone-standby
 
-iOS 17 の **スタンバイ（StandBy）** を、**どのスマートフォンでも** ブラウザで表示できるようにした Web アプリ（PWA）です。横向きに置くと、自動でウィジェットの全画面表示に切り替わります。
+iOS 17 のスタンバイ（StandBy）を、どのスマートフォンでもブラウザで表示できる Web アプリです。
 
 **公開 URL**: <https://keigo-hisazumi.github.io/smartphone-standby/>
 
