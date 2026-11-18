@@ -2,7 +2,7 @@
 // ビルド時に vite.config.ts のプラグインが下の BUILD を書き換え、
 // 成果物のバージョン（内容のハッシュ）とプリキャッシュするファイル一覧を埋め込む。
 // ページ遷移はネットワーク優先（オフライン時はキャッシュ）、同一オリジンの静的ファイルはキャッシュ優先にする。
-const BUILD = {"version":"cddf5d566769","assets":["./assets/index-BpeWKfUG.css","./assets/index-D7CbUgCs.js","./icon-180.png","./icon-192.png","./icon-512.png","./icon-maskable-512.png","./icon.svg","./","./manifest.webmanifest"]};
+const BUILD = {"version":"34f7d843e2a3","assets":["./apple-touch-icon-180x180.png","./assets/index-BpeWKfUG.css","./assets/index-D7CbUgCs.js","./favicon.ico","./icon.svg","./","./manifest.webmanifest","./maskable-icon-512x512.png","./pwa-192x192.png","./pwa-512x512.png","./pwa-64x64.png"]};
 const CACHE_PREFIX = 'standby-';
 const CACHE = `${CACHE_PREFIX}${BUILD.version}`;
 
