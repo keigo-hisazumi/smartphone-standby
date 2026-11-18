@@ -10,10 +10,14 @@
     "preview": "vite preview --host",
     "lint": "eslint .",
     "type-check": "tsc --noEmit",
-    "test:unit": "vitest run"
+    "test:unit": "vitest run",
+    "icons": "pwa-assets-generator",
+    "prebuild": "npm run icons",
+    "predev": "npm run icons"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@vite-pwa/assets-generator": "^2.0.0",
     "eslint": "^10.14.0",
     "globals": "^17.14.0",
     "typescript": "~6.0.3",
